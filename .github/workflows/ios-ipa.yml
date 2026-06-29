@@ -36,6 +36,12 @@ jobs:
           set -o pipefail
           npm install 2>&1 | tee build-logs/01-npm-install.log
 
+      - name: Prune Firebase JS packages
+        run: |
+          set -o pipefail
+          npm uninstall @react-native-firebase/app @react-native-firebase/analytics @react-native-firebase/crashlytics @react-native-firebase/remote-config --no-save 2>&1 | tee build-logs/01b-prune-firebase.log
+          ls -la node_modules/@react-native-firebase 2>&1 | tee -a build-logs/01b-prune-firebase.log || true
+
       - name: Restore GoogleService-Info.plist
         run: |
           set -e
