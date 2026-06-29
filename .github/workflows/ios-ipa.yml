@@ -48,6 +48,20 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
+      - name: Patch GoogleUtilities private header imports
+        run: |
+          set -e
+          {
+            echo "Before patch:"
+            grep -R "GoogleUtilities/.*/Public/GoogleUtilities/" ios/Pods/Headers/Public/GoogleUtilities || true
+
+            find ios/Pods/Headers/Public/GoogleUtilities -name "*_Private.h" -type f -print0 | \
+              xargs -0 perl -0pi -e 's/#import "GoogleUtilities\/[^\"]*\/Public\/GoogleUtilities\/([^\"]+)"/#import "$1"/g'
+
+            echo "After patch:"
+            grep -R "GoogleUtilities/.*/Public/GoogleUtilities/" ios/Pods/Headers/Public/GoogleUtilities || true
+          } 2>&1 | tee build-logs/03b-googleutilities-header-patch.log
+
       - name: Build unsigned iOS app
         run: |
           set -o pipefail
