@@ -19,6 +19,8 @@ end
 
 target 'ReaderApp' do
   use_expo_modules!
+  pod 'SpotlightIndexer', :path => './SpotlightIndexer'
+
   post_integrate do |installer|
     begin
       expo_patch_react_imports!(installer)
