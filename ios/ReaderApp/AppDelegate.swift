@@ -3,6 +3,7 @@ import Expo
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import CoreSpotlight
 
 import TSBackgroundFetch
 import RNBootSplash
@@ -23,6 +24,13 @@ class AppDelegate: ExpoAppDelegate {
   _ application: UIApplication,
   continue userActivity: NSUserActivity,
   restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    if userActivity.activityType == CSSearchableItemActionType,
+       let identifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String,
+       let url = URL(string: identifier) {
+      NSLog("[SpotlightIndexer] Opening Spotlight item: \(identifier)")
+      return self.application(application, open: url, options: [:])
+    }
+
     let result = RCTLinkingManager.application(
       application,
       continue: userActivity,
