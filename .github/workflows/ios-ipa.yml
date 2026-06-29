@@ -31,24 +31,47 @@ jobs:
             echo "macOS:" && sw_vers
           } 2>&1 | tee build-logs/00-versions.log
 
+      - name: Fast fail if Firebase source references remain
+        run: |
+          set -o pipefail
+          {
+            echo "Scanning source files for removed Firebase references..."
+            FOUND=0
+            grep -R -n "@react-native-firebase" . --exclude-dir=.git --exclude-dir=.github --exclude-dir=node_modules --exclude-dir=Pods --exclude-dir=build --exclude-dir=build-logs --exclude=package-lock.json --exclude=Podfile.lock && FOUND=1 || true
+            grep -R -n "FirebaseCore" ios index.js ReaderApp.js StateManager.js 2>/dev/null && FOUND=1 || true
+            grep -R -n "FirebaseApp.configure" ios index.js ReaderApp.js StateManager.js 2>/dev/null && FOUND=1 || true
+            if [ "$FOUND" = "1" ]; then
+              echo "ERROR: Firebase references remain in source. Stopping before npm/pods/xcodebuild."
+              exit 1
+            fi
+            echo "OK: no Firebase source references found."
+          } 2>&1 | tee build-logs/00b-fast-fail-source-scan.log
+
       - name: Install JS dependencies
         run: |
           set -o pipefail
           npm install 2>&1 | tee build-logs/01-npm-install.log
 
-      - name: Prune Firebase JS packages
+      - name: Remove leftover Firebase packages from install tree
         run: |
           set -o pipefail
-          npm uninstall @react-native-firebase/app @react-native-firebase/analytics @react-native-firebase/crashlytics @react-native-firebase/remote-config --no-save 2>&1 | tee build-logs/01b-prune-firebase.log
-          ls -la node_modules/@react-native-firebase 2>&1 | tee -a build-logs/01b-prune-firebase.log || true
+          rm -rf node_modules/@react-native-firebase
+          if [ -d node_modules/@react-native-firebase ]; then
+            echo "ERROR: node_modules/@react-native-firebase still exists" | tee build-logs/01b-remove-firebase.log
+            exit 1
+          fi
+          echo "OK: Firebase JS packages are absent from node_modules." | tee build-logs/01b-remove-firebase.log
 
-      - name: Restore GoogleService-Info.plist
+      - name: Bundle JS before Xcode build
         run: |
-          set -e
-          echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 --decode > ios/GoogleService-Info.plist
-          ls -l ios/GoogleService-Info.plist | tee build-logs/02-google-service-file.log
-        env:
-          GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64 }}
+          set -o pipefail
+          mkdir -p build-logs/jsbundle-assets
+          npx react-native bundle \
+            --platform ios \
+            --dev false \
+            --entry-file index.js \
+            --bundle-output build-logs/main.jsbundle \
+            --assets-dest build-logs/jsbundle-assets 2>&1 | tee build-logs/02-js-bundle.log
 
       - name: Install CocoaPods
         run: |
@@ -56,9 +79,21 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
-      - name: Skip Firebase pod verification on no Firebase branch
+      - name: Verify Firebase pods are absent
         run: |
-          echo "Firebase has been removed on this branch." | tee build-logs/03b-no-firebase.log
+          set -o pipefail
+          {
+            echo "Checking Podfile.lock for Firebase/Google/RNFB pods..."
+            FOUND=0
+            grep -n "Firebase" ios/Podfile.lock && FOUND=1 || true
+            grep -n "GoogleUtilities" ios/Podfile.lock && FOUND=1 || true
+            grep -n "RNFB" ios/Podfile.lock && FOUND=1 || true
+            if [ "$FOUND" = "1" ]; then
+              echo "ERROR: Firebase-related pods are still present. Stopping before xcodebuild."
+              exit 1
+            fi
+            echo "OK: no Firebase-related pods found."
+          } 2>&1 | tee build-logs/03b-no-firebase-pod-check.log
 
       - name: Build unsigned iOS app
         run: |
