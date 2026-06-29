@@ -99,24 +99,13 @@ jobs:
               if needle not in r:
                   raise SystemExit('Could not find AppIntentStateSync import insertion point in ReaderApp.js')
               r = r.replace(needle, needle + "import AppIntentStateSync from './AppIntentStateSync';\n")
-          if "import SpotlightIndexing from './SpotlightIndexing';" not in r:
-              needle = "import AppIntentStateSync from './AppIntentStateSync';\n"
-              if needle not in r:
-                  raise SystemExit('Could not find SpotlightIndexing import insertion point in ReaderApp.js')
-              r = r.replace(needle, needle + "import SpotlightIndexing from './SpotlightIndexing';\n")
           if "AppIntentStateSync.updateFromReaderApp(this.state, this.props);" not in r:
               needle = "  componentDidUpdate(prevProps, prevState) {\n"
               if needle not in r:
                   raise SystemExit('Could not find componentDidUpdate insertion point in ReaderApp.js')
               r = r.replace(needle, needle + "    AppIntentStateSync.updateFromReaderApp(this.state, this.props);\n", 1)
-          if "SpotlightIndexing.sync({ interfaceLanguage: this.props.interfaceLanguage })" not in r:
-              needle = "    this.setState({\n      loaded: true,\n    });\n"
-              if needle not in r:
-                  raise SystemExit('Could not find ReaderApp loaded-state insertion point')
-              replacement = needle + "    SpotlightIndexing.sync({ interfaceLanguage: this.props.interfaceLanguage }).catch(error => {\n      console.log('[SpotlightIndexing] automatic sync failed', error);\n    });\n"
-              r = r.replace(needle, replacement, 1)
           reader.write_text(r)
-          print('ReaderApp AppIntent state sync and automatic source cache integration applied')
+          print('ReaderApp AppIntent state sync integration applied')
 
           intents = Path('ios/SpotlightIndexer/SefariaAppIntents.swift')
           i = intents.read_text()
@@ -155,7 +144,6 @@ jobs:
             grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
             grep -n "updateAppState" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
             grep -n "AppIntentStateSync" ReaderApp.js
-            grep -n "SpotlightIndexing.sync" ReaderApp.js
             echo "OK: custom extension source verification passed."
           } 2>&1 | tee build-logs/00e-custom-extension-source-check.log
 
