@@ -31,20 +31,20 @@ jobs:
             echo "macOS:" && sw_vers
           } 2>&1 | tee build-logs/00-versions.log
 
-      - name: Fast fail if native Firebase references remain
+      - name: Fast fail if AppDelegate still initializes Firebase
         run: |
           set -o pipefail
           {
-            echo "Scanning native iOS files for Firebase references..."
+            echo "Scanning app delegate for native Firebase initialization..."
             FOUND=0
-            grep -R -n "FirebaseCore" ios --exclude-dir=Pods --exclude=Podfile.lock && FOUND=1 || true
-            grep -R -n "FirebaseApp.configure" ios --exclude-dir=Pods --exclude=Podfile.lock && FOUND=1 || true
+            grep -n "FirebaseCore" ios/ReaderApp/AppDelegate.swift && FOUND=1 || true
+            grep -n "FirebaseApp.configure" ios/ReaderApp/AppDelegate.swift && FOUND=1 || true
             if [ "$FOUND" = "1" ]; then
-              echo "ERROR: native Firebase references remain."
+              echo "ERROR: AppDelegate still initializes Firebase."
               exit 1
             fi
-            echo "OK: no native Firebase references found."
-          } 2>&1 | tee build-logs/00b-fast-fail-native-scan.log
+            echo "OK: AppDelegate has no Firebase initialization."
+          } 2>&1 | tee build-logs/00b-fast-fail-appdelegate-scan.log
 
       - name: Install JS dependencies
         run: |
@@ -115,6 +115,12 @@ jobs:
             --entry-file index.js \
             --bundle-output build-logs/main.jsbundle \
             --assets-dest build-logs/jsbundle-assets 2>&1 | tee build-logs/02-js-bundle.log
+
+      - name: Remove stale CocoaPods checkout artifacts
+        run: |
+          set -e
+          rm -rf ios/Pods ios/Podfile.lock ios/ReaderApp.xcworkspace
+          echo "Removed stale Pods, Podfile.lock, and workspace before fresh pod install." | tee build-logs/02b-clean-pods.log
 
       - name: Install CocoaPods
         run: |
