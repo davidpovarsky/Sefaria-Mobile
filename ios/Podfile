@@ -8,10 +8,8 @@ if Gem::Version.new(MIN_IOS_OVERRIDE) > Gem::Version.new(min_ios_version_support
 end
 
 platform :ios, min_ios_version_supported
-use_modular_headers!
 prepare_react_native_project!
 
-$RNFirebaseAnalyticsWithoutAdIdSupport=true
 production = ENV["PRODUCTION"] == "1"
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
