@@ -1,18 +1,16 @@
 ENV['RCT_NEW_ARCH_ENABLED'] = '1'
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-# Resolve react_native_pods.rb with node to allow for hoisting
-require Pod::Executable.execute_command('node', ['-p',
-  'require.resolve(
-    "react-native/scripts/react_native_pods.rb",
-    {paths: [process.argv[1]]},
-  )', __dir__]).strip
+require Pod::Executable.execute_command('node', ['-p', 'require.resolve("react-native/scripts/react_native_pods.rb", {paths: [process.argv[1]]})', __dir__]).strip
 
 MIN_IOS_OVERRIDE = '15.5'
 if Gem::Version.new(MIN_IOS_OVERRIDE) > Gem::Version.new(min_ios_version_supported)
   min_ios_version_supported = MIN_IOS_OVERRIDE
 end
+
 platform :ios, min_ios_version_supported
+use_modular_headers!
 prepare_react_native_project!
+
 $RNFirebaseAnalyticsWithoutAdIdSupport=true
 production = ENV["PRODUCTION"] == "1"
 linkage = ENV['USE_FRAMEWORKS']
@@ -23,42 +21,29 @@ end
 
 target 'ReaderApp' do
   use_expo_modules!
-	post_integrate do |installer|
-	  begin
+  post_integrate do |installer|
+    begin
       expo_patch_react_imports!(installer)
     rescue => e
       Pod::UI.warn e
     end
   end
+
   $config = use_native_modules!
   use_react_native!(
     :path => $config[:reactNativePath],
     :production => production,
-    # An absolute path to your application root.
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-
-  # Pods for ReaderApp
-  # Firebase pods are provided by the @react-native-firebase packages through autolinking.
-
 end
 
 post_install do |installer|
   react_native_post_install(
     installer,
     $config[:reactNativePath],
-    :mac_catalyst_enabled => false,
-    # :ccache_enabled => true
+    :mac_catalyst_enabled => false
   )
   installer.pods_project.build_configurations.each do |curr_config|
     curr_config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
   end
 end
-
-# post_install do |installer|
-#   installer.pods_project.targets.each do |target|
-#     if target.name == "React"
-#       target.remove_from_project
-#     end
-#   end
-# end
