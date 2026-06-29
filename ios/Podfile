@@ -22,18 +22,6 @@ if linkage != nil
 end
 
 target 'ReaderApp' do
-  pod 'Firebase', :modular_headers => true
-  pod 'FirebaseCoreInternal', :modular_headers => true
-  pod 'GoogleUtilities', :modular_headers => true
-  pod 'FirebaseCrashlytics', :modular_headers => true
-  pod 'FirebaseCore', :modular_headers => true
-  pod 'FirebaseInstallations', :modular_headers => true
-  pod 'GoogleDataTransport', :modular_headers => true
-  pod 'nanopb', :modular_headers => true
-  pod 'FirebaseRemoteConfig', :modular_headers => true
-  pod 'FirebaseABTesting', :modular_headers => true
-  pod 'FirebaseSessions', :modular_headers => true
-  pod 'FirebaseCoreExtension', :modular_headers => true
   use_expo_modules!
 	post_integrate do |installer|
 	  begin
@@ -51,7 +39,7 @@ target 'ReaderApp' do
   )
 
   # Pods for ReaderApp
-  # <THIS LINE LEFT EMPTY ON PURPOSE>
+  # Firebase pods are provided by the @react-native-firebase packages through autolinking.
 
 end
 
@@ -62,21 +50,6 @@ post_install do |installer|
     :mac_catalyst_enabled => false,
     # :ccache_enabled => true
   )
-
-  pods_root_header_path = '$(PODS_ROOT)'
-  google_utilities_header_path = '$(PODS_ROOT)/GoogleUtilities'
-
-  installer.pods_project.targets.each do |target|
-    target.build_configurations.each do |config|
-      header_search_paths = config.build_settings['HEADER_SEARCH_PATHS'] || ['$(inherited)']
-      header_search_paths = [header_search_paths] if header_search_paths.is_a?(String)
-      [pods_root_header_path, google_utilities_header_path].each do |path|
-        header_search_paths << path unless header_search_paths.include?(path)
-      end
-      config.build_settings['HEADER_SEARCH_PATHS'] = header_search_paths
-    end
-  end
-
   installer.pods_project.build_configurations.each do |curr_config|
     curr_config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
   end
