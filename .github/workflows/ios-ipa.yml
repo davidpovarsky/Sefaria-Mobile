@@ -46,6 +46,30 @@ jobs:
             echo "OK: AppDelegate has no Firebase initialization."
           } 2>&1 | tee build-logs/00b-fast-fail-appdelegate-scan.log
 
+      - name: Create dummy GoogleService plist for Xcode resource reference
+        run: |
+          set -e
+          cat > ios/GoogleService-Info.plist <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>GOOGLE_APP_ID</key>
+            <string>dummy-no-firebase-build</string>
+            <key>GCM_SENDER_ID</key>
+            <string>000000000000</string>
+            <key>API_KEY</key>
+            <string>dummy</string>
+            <key>PROJECT_ID</key>
+            <string>dummy-no-firebase-build</string>
+            <key>BUNDLE_ID</key>
+            <string>com.davidpovarsky.sefariareader</string>
+          </dict>
+          </plist>
+          EOF
+          plutil -lint ios/GoogleService-Info.plist
+          ls -l ios/GoogleService-Info.plist | tee build-logs/00c-dummy-google-service-plist.log
+
       - name: Install JS dependencies
         run: |
           set -o pipefail
