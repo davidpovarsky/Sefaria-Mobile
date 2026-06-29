@@ -3,6 +3,8 @@
 #import <React/RCTBridgeModule.h>
 
 static NSString * const SefariaSpotlightDomain = @"org.sefaria.reader.sources";
+static NSString * const SefariaIntentSourcesKey = @"SefariaIntentSourcesV1";
+static NSString * const SefariaIntentStateKey = @"SefariaIntentCurrentStateV1";
 
 @interface SpotlightIndexer : NSObject <RCTBridgeModule>
 @end
@@ -16,6 +18,32 @@ RCT_EXPORT_MODULE();
   return NO;
 }
 
++ (void)saveJSONArray:(NSArray *)array key:(NSString *)key
+{
+  if (!array) { return; }
+  NSError *error = nil;
+  NSData *data = [NSJSONSerialization dataWithJSONObject:array options:0 error:&error];
+  if (error || !data) {
+    NSLog(@"[SefariaIntentsStore] Failed to serialize array for %@: %@", key, error);
+    return;
+  }
+  [[NSUserDefaults standardUserDefaults] setObject:data forKey:key];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
++ (void)saveJSONDictionary:(NSDictionary *)dict key:(NSString *)key
+{
+  if (!dict) { return; }
+  NSError *error = nil;
+  NSData *data = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&error];
+  if (error || !data) {
+    NSLog(@"[SefariaIntentsStore] Failed to serialize dictionary for %@: %@", key, error);
+    return;
+  }
+  [[NSUserDefaults standardUserDefaults] setObject:data forKey:key];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
 RCT_REMAP_METHOD(isIndexingAvailable,
                  isIndexingAvailableWithResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
@@ -23,13 +51,55 @@ RCT_REMAP_METHOD(isIndexingAvailable,
   resolve(@([CSSearchableIndex isIndexingAvailable]));
 }
 
+RCT_REMAP_METHOD(updateAppState,
+                 updateAppState:(NSDictionary *)state
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+  if (![state isKindOfClass:[NSDictionary class]]) {
+    resolve(@{@"saved": @NO});
+    return;
+  }
+  NSMutableDictionary *mutableState = [state mutableCopy];
+  mutableState[@"nativeSavedAt"] = @([[NSDate date] timeIntervalSince1970] * 1000);
+  [SpotlightIndexer saveJSONDictionary:mutableState key:SefariaIntentStateKey];
+  NSLog(@"[SefariaIntentsStore] Saved current app state for shortcuts");
+  resolve(@{@"saved": @YES});
+}
+
+RCT_REMAP_METHOD(getCurrentAppState,
+                 getCurrentAppStateWithResolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSData *data = [[NSUserDefaults standardUserDefaults] objectForKey:SefariaIntentStateKey];
+  if (!data) {
+    resolve(@{});
+    return;
+  }
+  NSError *error = nil;
+  id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+  if (error || !object) {
+    reject(@"state_decode_error", error.localizedDescription, error);
+    return;
+  }
+  resolve(object);
+}
+
 RCT_REMAP_METHOD(indexItems,
                  indexItems:(NSArray *)items
                  resolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
+  if (![items isKindOfClass:[NSArray class]]) {
+    resolve(@{@"available": @([CSSearchableIndex isIndexingAvailable]), @"indexed": @0});
+    return;
+  }
+
+  [SpotlightIndexer saveJSONArray:items key:SefariaIntentSourcesKey];
+  NSLog(@"[SefariaIntentsStore] Saved %lu source items for shortcuts", (unsigned long)items.count);
+
   if (![CSSearchableIndex isIndexingAvailable]) {
-    resolve(@{@"available": @NO, @"indexed": @0});
+    resolve(@{@"available": @NO, @"indexed": @0, @"cachedForIntents": @(items.count)});
     return;
   }
 
@@ -68,7 +138,7 @@ RCT_REMAP_METHOD(indexItems,
       return;
     }
     NSLog(@"[SpotlightIndexer] Indexed %lu items", (unsigned long)searchableItems.count);
-    resolve(@{@"available": @YES, @"indexed": @(searchableItems.count)});
+    resolve(@{@"available": @YES, @"indexed": @(searchableItems.count), @"cachedForIntents": @(items.count)});
   }];
 }
 
@@ -76,6 +146,9 @@ RCT_REMAP_METHOD(deleteAll,
                  deleteAllWithResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
+  [[NSUserDefaults standardUserDefaults] removeObjectForKey:SefariaIntentSourcesKey];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+
   if (![CSSearchableIndex isIndexingAvailable]) {
     resolve(@{@"available": @NO, @"deleted": @0});
     return;
