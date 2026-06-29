@@ -48,19 +48,61 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
-      - name: Patch GoogleUtilities private header imports
+      - name: Patch GoogleUtilities imports in Pods
         run: |
           set -e
-          {
-            echo "Before patch:"
-            grep -R "GoogleUtilities/.*/Public/GoogleUtilities/" ios/Pods/Headers/Public/GoogleUtilities || true
+          python3 - <<'PY' 2>&1 | tee build-logs/03b-googleutilities-header-patch.log
+          import os
+          import re
 
-            find ios/Pods/Headers/Public/GoogleUtilities -name "*_Private.h" -type f -print0 | \
-              xargs -0 perl -0pi -e 's/#import "GoogleUtilities\/[^\"]*\/Public\/GoogleUtilities\/([^\"]+)"/#import "$1"/g'
+          root = "ios/Pods"
+          pattern = re.compile(r'#import "GoogleUtilities/[^\"]+/Public/GoogleUtilities/([^\"]+)"')
+          patched = []
+          remaining = []
 
-            echo "After patch:"
-            grep -R "GoogleUtilities/.*/Public/GoogleUtilities/" ios/Pods/Headers/Public/GoogleUtilities || true
-          } 2>&1 | tee build-logs/03b-googleutilities-header-patch.log
+          for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+              for filename in filenames:
+                  if not filename.endswith((".h", ".m", ".mm", ".swift", ".modulemap")):
+                      continue
+                  path = os.path.join(dirpath, filename)
+                  try:
+                      with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                          old = f.read()
+                  except OSError:
+                      continue
+
+                  new = pattern.sub(r'#import "\1"', old)
+                  if new != old:
+                      with open(path, "w", encoding="utf-8") as f:
+                          f.write(new)
+                      patched.append(path)
+
+          for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+              for filename in filenames:
+                  if not filename.endswith((".h", ".m", ".mm", ".swift", ".modulemap")):
+                      continue
+                  path = os.path.join(dirpath, filename)
+                  try:
+                      with open(path, "r", encoding="utf-8", errors="ignore") as f:
+                          text = f.read()
+                  except OSError:
+                      continue
+                  if pattern.search(text):
+                      remaining.append(path)
+
+          print(f"Patched files: {len(patched)}")
+          for path in patched[:100]:
+              print(f"PATCHED {path}")
+          if len(patched) > 100:
+              print(f"... and {len(patched) - 100} more")
+
+          print(f"Remaining broken imports: {len(remaining)}")
+          for path in remaining[:100]:
+              print(f"REMAINING {path}")
+
+          if remaining:
+              raise SystemExit(1)
+          PY
 
       - name: Build unsigned iOS app
         run: |
