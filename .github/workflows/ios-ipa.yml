@@ -99,35 +99,63 @@ jobs:
               if needle not in r:
                   raise SystemExit('Could not find AppIntentStateSync import insertion point in ReaderApp.js')
               r = r.replace(needle, needle + "import AppIntentStateSync from './AppIntentStateSync';\n")
+          if "import SpotlightIndexing from './SpotlightIndexing';" not in r:
+              needle = "import AppIntentStateSync from './AppIntentStateSync';\n"
+              if needle not in r:
+                  raise SystemExit('Could not find SpotlightIndexing import insertion point in ReaderApp.js')
+              r = r.replace(needle, needle + "import SpotlightIndexing from './SpotlightIndexing';\n")
           if "AppIntentStateSync.updateFromReaderApp(this.state, this.props);" not in r:
               needle = "  componentDidUpdate(prevProps, prevState) {\n"
               if needle not in r:
                   raise SystemExit('Could not find componentDidUpdate insertion point in ReaderApp.js')
               r = r.replace(needle, needle + "    AppIntentStateSync.updateFromReaderApp(this.state, this.props);\n", 1)
+          if "SpotlightIndexing.sync({ interfaceLanguage: this.props.interfaceLanguage })" not in r:
+              needle = "    this.setState({\n      loaded: true,\n    });\n"
+              if needle not in r:
+                  raise SystemExit('Could not find ReaderApp loaded-state insertion point')
+              replacement = needle + "    SpotlightIndexing.sync({ interfaceLanguage: this.props.interfaceLanguage }).catch(error => {\n      console.log('[SpotlightIndexing] automatic sync failed', error);\n    });\n"
+              r = r.replace(needle, replacement, 1)
           reader.write_text(r)
-          print('ReaderApp AppIntent state sync integration applied')
+          print('ReaderApp AppIntent state sync and automatic source cache integration applied')
+
+          intents = Path('ios/SpotlightIndexer/SefariaAppIntents.swift')
+          i = intents.read_text()
+          i = i.replace('static let baseURL = "https://www.sefaria.org/"', 'static let baseURL = "sefariareader://www.sefaria.org/"')
+          i = i.replace('struct SearchSefariaTextsIntent: AppIntent', 'struct SearchSefariaTextsLegacyIntent: AppIntent')
+          i = i.replace('struct RebuildSefariaSourceCacheIntent: AppIntent', 'struct RebuildSefariaSourceCacheIntent')
+          i = i.replace('AppShortcut(intent: RebuildSefariaSourceCacheIntent(), phrases: ["Rebuild source cache in \\(.applicationName)"])', 'AppShortcut(intent: LookupSefariaNameIntent(), phrases: ["Lookup name in \\(.applicationName)"])')
+          intents.write_text(i)
+          print('SefariaAppIntents patched: custom scheme, legacy search renamed, Name API shortcut exposed')
           PY
 
       - name: Verify custom extension source files
         run: |
           set -o pipefail
           {
-            echo "Checking Spotlight and App Intent source files and integration points..."
+            echo "Checking Spotlight, App Intents, custom URL scheme, and API integration points..."
             test -f SpotlightIndexing.js
             test -f SpotlightSettingsPanel.js
             test -f AppIntentStateSync.js
             test -f ios/SpotlightIndexer/SpotlightIndexer.podspec
             test -f ios/SpotlightIndexer/SpotlightIndexer.m
             test -f ios/SpotlightIndexer/SefariaAppIntents.swift
+            test -f ios/SpotlightIndexer/SefariaNameIntent.swift
+            test -f ios/SpotlightIndexer/SefariaSearchWrapperIntent.swift
+            grep -n "CFBundleURLTypes" ios/ReaderApp/Info.plist
+            grep -n "sefariareader" ios/ReaderApp/Info.plist
             grep -n "pod 'SpotlightIndexer'" ios/Podfile
             grep -n "CoreSpotlight" ios/ReaderApp/AppDelegate.swift ios/SpotlightIndexer/SpotlightIndexer.m ios/SpotlightIndexer/SpotlightIndexer.podspec
-            grep -n "AppIntents" ios/SpotlightIndexer/SefariaAppIntents.swift ios/SpotlightIndexer/SpotlightIndexer.podspec
+            grep -n "AppIntents" ios/SpotlightIndexer/SefariaAppIntents.swift ios/SpotlightIndexer/SefariaNameIntent.swift ios/SpotlightIndexer/SefariaSearchWrapperIntent.swift ios/SpotlightIndexer/SpotlightIndexer.podspec
             grep -n "AppShortcutsProvider" ios/SpotlightIndexer/SefariaAppIntents.swift
+            grep -n "LookupSefariaNameIntent" ios/SpotlightIndexer/SefariaAppIntents.swift ios/SpotlightIndexer/SefariaNameIntent.swift
+            grep -n "api/search-wrapper" ios/SpotlightIndexer/SefariaSearchWrapperIntent.swift
+            grep -n "api/name" ios/SpotlightIndexer/SefariaNameIntent.swift
             grep -n "CSSearchableItemActionType" ios/ReaderApp/AppDelegate.swift
             grep -n "SpotlightSettingsPanel" SettingsPage.js
             grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
             grep -n "updateAppState" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
             grep -n "AppIntentStateSync" ReaderApp.js
+            grep -n "SpotlightIndexing.sync" ReaderApp.js
             echo "OK: custom extension source verification passed."
           } 2>&1 | tee build-logs/00e-custom-extension-source-check.log
 
@@ -221,6 +249,8 @@ jobs:
             grep -n "SpotlightIndexer" ios/Podfile.lock
             find ios/Pods -maxdepth 6 -iname '*SpotlightIndexer*' -print || true
             find ios/Pods -maxdepth 6 -iname '*SefariaAppIntents*' -print || true
+            find ios/Pods -maxdepth 6 -iname '*SefariaNameIntent*' -print || true
+            find ios/Pods -maxdepth 6 -iname '*SefariaSearchWrapperIntent*' -print || true
             echo "OK: SpotlightIndexer pod is present."
           } 2>&1 | tee build-logs/03a-spotlight-appintents-pod-check.log
 
