@@ -50,16 +50,9 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
-      - name: Verify Firebase pod layout
+      - name: Skip Firebase pod verification on no Firebase branch
         run: |
-          {
-            echo "Firebase-related pods in Podfile.lock after pod install:"
-            grep -n "Firebase\|GoogleUtilities\|RNFB" ios/Podfile.lock | head -n 120 || true
-            echo "GoogleUtilities headers found under ios/Pods:"
-            find ios/Pods -name "GULAppDelegateSwizzler.h" -o -name "GULAppDelegateSwizzler_Private.h" | sort || true
-            echo "Problematic private header import, if present:"
-            grep -R -n "GoogleUtilities/.*/Public/GoogleUtilities" ios/Pods/Headers/Public/GoogleUtilities 2>/dev/null || true
-          } 2>&1 | tee build-logs/03b-firebase-pod-layout.log
+          echo "Firebase has been removed on this branch." | tee build-logs/03b-no-firebase.log
 
       - name: Build unsigned iOS app
         run: |
