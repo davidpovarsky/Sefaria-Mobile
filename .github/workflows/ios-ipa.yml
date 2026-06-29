@@ -70,6 +70,45 @@ jobs:
           plutil -lint ios/GoogleService-Info.plist
           ls -l ios/GoogleService-Info.plist | tee build-logs/00c-dummy-google-service-plist.log
 
+      - name: Apply Spotlight settings integration patch
+        run: |
+          set -o pipefail
+          python3 - <<'PY' 2>&1 | tee build-logs/00d-spotlight-settings-patch.log
+          from pathlib import Path
+          p = Path('SettingsPage.js')
+          s = p.read_text()
+          if "import SpotlightSettingsPanel from './SpotlightSettingsPanel';" not in s:
+              needle = "import { trackEvent } from './analytics/events';\n"
+              if needle not in s:
+                  raise SystemExit('Could not find analytics import insertion point')
+              s = s.replace(needle, needle + "import SpotlightSettingsPanel from './SpotlightSettingsPanel';\n")
+          if '<SpotlightSettingsPanel interfaceLanguage={interfaceLanguage} langStyle={langStyle} theme={theme} />' not in s:
+              needle = "        <OfflinePackageList isDisabledObj={isDisabledObj} onPackagePress={onPackagePress} />\n        <View style={[styles.readerDisplayOptionsMenuDivider, styles.settingsDivider, styles.underOfflinePackages, theme.readerDisplayOptionsMenuDivider]}/>\n"
+              if needle not in s:
+                  raise SystemExit('Could not find Settings insertion point')
+              replacement = needle + "        <SpotlightSettingsPanel interfaceLanguage={interfaceLanguage} langStyle={langStyle} theme={theme} />\n        <View style={[styles.readerDisplayOptionsMenuDivider, styles.settingsDivider, theme.readerDisplayOptionsMenuDivider]}/>\n"
+              s = s.replace(needle, replacement)
+          p.write_text(s)
+          print('SettingsPage Spotlight panel integration applied')
+          PY
+
+      - name: Verify Spotlight source files
+        run: |
+          set -o pipefail
+          {
+            echo "Checking Spotlight source files and integration points..."
+            test -f SpotlightIndexing.js
+            test -f SpotlightSettingsPanel.js
+            test -f ios/SpotlightIndexer/SpotlightIndexer.podspec
+            test -f ios/SpotlightIndexer/SpotlightIndexer.m
+            grep -n "pod 'SpotlightIndexer'" ios/Podfile
+            grep -n "CoreSpotlight" ios/ReaderApp/AppDelegate.swift ios/SpotlightIndexer/SpotlightIndexer.m ios/SpotlightIndexer/SpotlightIndexer.podspec
+            grep -n "CSSearchableItemActionType" ios/ReaderApp/AppDelegate.swift
+            grep -n "SpotlightSettingsPanel" SettingsPage.js
+            grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
+            echo "OK: Spotlight source verification passed."
+          } 2>&1 | tee build-logs/00e-spotlight-source-check.log
+
       - name: Install JS dependencies
         run: |
           set -o pipefail
@@ -151,6 +190,16 @@ jobs:
           set -o pipefail
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
+
+      - name: Verify Spotlight pod installed
+        run: |
+          set -o pipefail
+          {
+            echo "Checking Podfile.lock for SpotlightIndexer..."
+            grep -n "SpotlightIndexer" ios/Podfile.lock
+            find ios/Pods -maxdepth 5 -iname '*SpotlightIndexer*' -print || true
+            echo "OK: SpotlightIndexer pod is present."
+          } 2>&1 | tee build-logs/03a-spotlight-pod-check.log
 
       - name: Verify Firebase pods are absent
         run: |
