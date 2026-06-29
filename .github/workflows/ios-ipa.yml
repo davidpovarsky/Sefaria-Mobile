@@ -70,44 +70,66 @@ jobs:
           plutil -lint ios/GoogleService-Info.plist
           ls -l ios/GoogleService-Info.plist | tee build-logs/00c-dummy-google-service-plist.log
 
-      - name: Apply Spotlight settings integration patch
+      - name: Apply custom Sefaria extensions integration patch
         run: |
           set -o pipefail
-          python3 - <<'PY' 2>&1 | tee build-logs/00d-spotlight-settings-patch.log
+          python3 - <<'PY' 2>&1 | tee build-logs/00d-custom-extensions-patch.log
           from pathlib import Path
-          p = Path('SettingsPage.js')
-          s = p.read_text()
+
+          settings = Path('SettingsPage.js')
+          s = settings.read_text()
           if "import SpotlightSettingsPanel from './SpotlightSettingsPanel';" not in s:
               needle = "import { trackEvent } from './analytics/events';\n"
               if needle not in s:
-                  raise SystemExit('Could not find analytics import insertion point')
+                  raise SystemExit('Could not find analytics import insertion point in SettingsPage.js')
               s = s.replace(needle, needle + "import SpotlightSettingsPanel from './SpotlightSettingsPanel';\n")
           if '<SpotlightSettingsPanel interfaceLanguage={interfaceLanguage} langStyle={langStyle} theme={theme} />' not in s:
               needle = "        <OfflinePackageList isDisabledObj={isDisabledObj} onPackagePress={onPackagePress} />\n        <View style={[styles.readerDisplayOptionsMenuDivider, styles.settingsDivider, styles.underOfflinePackages, theme.readerDisplayOptionsMenuDivider]}/>\n"
               if needle not in s:
-                  raise SystemExit('Could not find Settings insertion point')
+                  raise SystemExit('Could not find Settings insertion point in SettingsPage.js')
               replacement = needle + "        <SpotlightSettingsPanel interfaceLanguage={interfaceLanguage} langStyle={langStyle} theme={theme} />\n        <View style={[styles.readerDisplayOptionsMenuDivider, styles.settingsDivider, theme.readerDisplayOptionsMenuDivider]}/>\n"
               s = s.replace(needle, replacement)
-          p.write_text(s)
+          settings.write_text(s)
           print('SettingsPage Spotlight panel integration applied')
+
+          reader = Path('ReaderApp.js')
+          r = reader.read_text()
+          if "import AppIntentStateSync from './AppIntentStateSync';" not in r:
+              needle = "import CrashlyticsService from './analytics/crashlytics';\n"
+              if needle not in r:
+                  raise SystemExit('Could not find AppIntentStateSync import insertion point in ReaderApp.js')
+              r = r.replace(needle, needle + "import AppIntentStateSync from './AppIntentStateSync';\n")
+          if "AppIntentStateSync.updateFromReaderApp(this.state, this.props);" not in r:
+              needle = "  componentDidUpdate(prevProps, prevState) {\n"
+              if needle not in r:
+                  raise SystemExit('Could not find componentDidUpdate insertion point in ReaderApp.js')
+              r = r.replace(needle, needle + "    AppIntentStateSync.updateFromReaderApp(this.state, this.props);\n", 1)
+          reader.write_text(r)
+          print('ReaderApp AppIntent state sync integration applied')
           PY
 
-      - name: Verify Spotlight source files
+      - name: Verify custom extension source files
         run: |
           set -o pipefail
           {
-            echo "Checking Spotlight source files and integration points..."
+            echo "Checking Spotlight and App Intent source files and integration points..."
             test -f SpotlightIndexing.js
             test -f SpotlightSettingsPanel.js
+            test -f AppIntentStateSync.js
             test -f ios/SpotlightIndexer/SpotlightIndexer.podspec
             test -f ios/SpotlightIndexer/SpotlightIndexer.m
+            test -f ios/SpotlightIndexer/SefariaAppIntents.swift
             grep -n "pod 'SpotlightIndexer'" ios/Podfile
             grep -n "CoreSpotlight" ios/ReaderApp/AppDelegate.swift ios/SpotlightIndexer/SpotlightIndexer.m ios/SpotlightIndexer/SpotlightIndexer.podspec
+            grep -n "AppIntents" ios/SpotlightIndexer/SefariaAppIntents.swift ios/SpotlightIndexer/SpotlightIndexer.podspec
+            grep -n "AppShortcutsProvider" ios/SpotlightIndexer/SefariaAppIntents.swift
             grep -n "CSSearchableItemActionType" ios/ReaderApp/AppDelegate.swift
             grep -n "SpotlightSettingsPanel" SettingsPage.js
             grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
-            echo "OK: Spotlight source verification passed."
-          } 2>&1 | tee build-logs/00e-spotlight-source-check.log
+            grep -n "updateAppState" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
+            grep -n "AppIntentStateSync" ReaderApp.js
+            echo "OK: custom extension source verification passed."
+          } 2>&1 | tee build-logs/00e-custom-extension-source-check.log
 
       - name: Install JS dependencies
         run: |
@@ -191,15 +213,16 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
-      - name: Verify Spotlight pod installed
+      - name: Verify Spotlight and App Intents pod installed
         run: |
           set -o pipefail
           {
-            echo "Checking Podfile.lock for SpotlightIndexer..."
+            echo "Checking Podfile.lock for SpotlightIndexer and App Intent sources..."
             grep -n "SpotlightIndexer" ios/Podfile.lock
-            find ios/Pods -maxdepth 5 -iname '*SpotlightIndexer*' -print || true
+            find ios/Pods -maxdepth 6 -iname '*SpotlightIndexer*' -print || true
+            find ios/Pods -maxdepth 6 -iname '*SefariaAppIntents*' -print || true
             echo "OK: SpotlightIndexer pod is present."
-          } 2>&1 | tee build-logs/03a-spotlight-pod-check.log
+          } 2>&1 | tee build-logs/03a-spotlight-appintents-pod-check.log
 
       - name: Verify Firebase pods are absent
         run: |
