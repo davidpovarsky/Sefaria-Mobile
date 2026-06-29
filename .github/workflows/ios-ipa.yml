@@ -50,16 +50,16 @@ jobs:
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
-      - name: Verify GoogleUtilities header layout
+      - name: Verify Firebase pod layout
         run: |
           {
-            echo "Checking required GoogleUtilities header path:"
-            ls -l ios/Pods/GoogleUtilities/AppDelegateSwizzler/Public/GoogleUtilities/GULAppDelegateSwizzler.h
-            echo "Checking generated public private header import:"
-            grep -n "GULAppDelegateSwizzler" ios/Pods/Headers/Public/GoogleUtilities/GULAppDelegateSwizzler_Private.h || true
-            echo "Checking Pods project header search paths include PODS_ROOT:"
-            grep -n "PODS_ROOT" ios/Pods/Pods.xcodeproj/project.pbxproj | head -n 40 || true
-          } 2>&1 | tee build-logs/03b-googleutilities-verify.log
+            echo "Firebase-related pods in Podfile.lock after pod install:"
+            grep -n "Firebase\|GoogleUtilities\|RNFB" ios/Podfile.lock | head -n 120 || true
+            echo "GoogleUtilities headers found under ios/Pods:"
+            find ios/Pods -name "GULAppDelegateSwizzler.h" -o -name "GULAppDelegateSwizzler_Private.h" | sort || true
+            echo "Problematic private header import, if present:"
+            grep -R -n "GoogleUtilities/.*/Public/GoogleUtilities" ios/Pods/Headers/Public/GoogleUtilities 2>/dev/null || true
+          } 2>&1 | tee build-logs/03b-firebase-pod-layout.log
 
       - name: Build unsigned iOS app
         run: |
