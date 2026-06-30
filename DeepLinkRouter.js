@@ -3,6 +3,7 @@
 import PropTypes from 'prop-types';
 import URL from 'url-parse';
 import React from 'react';
+import Sefaria from './sefaria';
 
 class DeepLinkRouter extends React.PureComponent {
   static propTypes = {
@@ -26,9 +27,10 @@ class DeepLinkRouter extends React.PureComponent {
       ['^texts/(history)$', this.openMenu, ['menu']],
       ['^texts/(.+)?$', this.openCats, ['cats']],
       ['^search$', this.openSearch],
+      ['^__quick/(settings|open-ref|random)$', this.openQuickAction, ['action']],
       ['^topics/(category)/(.+)$', this.openTopic, ['categoryString','slug']],
       ['^topics/(.+)$', {fromOutside: this.catchAll, fromInside: this.openTopic}, ['slug']],
-      ['^([^/]+)$', this.openRef, ['tref']],  // NOTE: if any static page matches a title, it will try to be opened in the app. In this case, we'll need to explicitly list the route above this route.
+      ['^([^/]+)$', this.openRef, ['tref']],
       ['^.*$', this.catchAll],
     ];
     this._routes = routes.map(([ regex, funcOrObj, namedCaptureGroups ]) => new Route({regex, funcOrObj, namedCaptureGroups}));
@@ -37,7 +39,7 @@ class DeepLinkRouter extends React.PureComponent {
     this.props.openMenu(menu);
   };
   openTopicFromTag = ({ tag }) => {
-    const slug = tag.toLowerCase().replace(/ /g, '-');  // approximation at what the slug should be
+    const slug = tag.toLowerCase().replace(/ /g, '-');
     this.openTopic({ slug });
   };
   openCats = ({ cats }) => {
@@ -49,35 +51,72 @@ class DeepLinkRouter extends React.PureComponent {
     const isCategory = !!categoryString;
     this.props.openTopic({slug}, isCategory);
   };
+  openQuickAction = ({ action }) => {
+    switch (action) {
+      case 'settings':
+        this.props.openMenu('settings', 'quick-action');
+        return;
+      case 'open-ref':
+        this.props.setSearchOptions('text', 'relevance', false, () => {
+          this.props.openSearch('text', '');
+        });
+        return;
+      case 'random': {
+        const titles = this._flattenTocTitles(Sefaria.toc || []);
+        if (titles.length) {
+          const title = titles[Math.floor(Math.random() * titles.length)];
+          this.props.openTextTocDirectly(title);
+        } else {
+          this.props.openNav();
+        }
+        return;
+      }
+      default:
+        this.props.openNav();
+    }
+  };
+  _flattenTocTitles = (nodes) => {
+    const titles = [];
+    const walk = items => {
+      if (!Array.isArray(items)) { return; }
+      items.forEach(item => {
+        if (!item) { return; }
+        if (item.title && !item.contents) {
+          titles.push(item.title);
+        }
+        if (item.contents) {
+          walk(item.contents);
+        }
+      });
+    };
+    walk(nodes);
+    return titles;
+  };
   openRef = ({ tref, ven, vhe, version, aliyot, lang, url }) => {
-    // wrapper for openRef to convert url params to function params
-    // TODO handle sheet ref case
     let { ref, title } = Sefaria.urlToRef(tref);
     if (!title) {
-      Sefaria.api.name(ref, true).then(results => {   // look for alt title in ref
+      Sefaria.api.name(ref, true).then(results => {
           const matches = results.completion_objects.filter(obj => obj.type === 'ref' && ref.includes(obj.title));
           if (matches.length > 0) {
             ref = ref.replace(matches[0].title, matches[0].key);
             this.openStandardRef(ref, aliyot, ven, vhe, lang);
           }
           else {
-            this.catchAll({ url }); /* can't find an alt title, so just open site */
+            this.catchAll({ url });
           }
       }).catch(err => {
         this.catchAll({url});
       });
     }
     else if (ref === title) {
-      // book table of contents
       this.props.openTextTocDirectly(title);
     } else {
-      // standard ref
       this.openStandardRef(ref, aliyot, ven, vhe, lang);
     }
   };
   openStandardRef = (ref, aliyot, ven, vhe, lang) => {
     const enableAliyot = !!aliyot && aliyot.length > 0 && aliyot !== '0';
-    ven = ven?.replace(/^[a-z]+\|/, '');  // remove version language prefix if it exists
+    ven = ven?.replace(/^[a-z]+\|/, '');
     vhe = vhe?.replace(/^[a-z]+\|/, '');
     const versions = { en: ven, he: vhe };
     const longLang = Sefaria.util.shortLangToLong(lang);
@@ -87,28 +126,24 @@ class DeepLinkRouter extends React.PureComponent {
     this.props.openRef(ref, 'deep link', versions, true, enableAliyot);
   }
   openSearch = ({ q, tab, tvar, tsort, svar, ssort }) => {
-    // TODO: implement tab, svar and ssort
     const isExact = !!tvar && tvar.length > 0 && tvar === '0';
     tsort = tsort || 'relevance';
     tab = tab || 'text';
-    this.props.setSearchOptions(tab, tsort, isExact, () => { this.props.openSearch(tab, q); });
+    this.props.setSearchOptions(tab, tsort, isExact, () => { this.props.openSearch(tab, q || ''); });
   };
   catchAll = ({ url }) => {
-    // runs in case no route can handle this url
     this.props.openUri(url);
   };
   route = (url, fromOutside=false) => {
     const u = new URL(url, Sefaria.api._baseHost, true);
     let { pathname, query, host, hostname } = u;
     if (!hostname.match('(?:www\.)?sefaria\.org')) {
-      // this is not a sefaria URL. Route to browser
       this.catchAll({ url });
       return;
     }
-    pathname = pathname.replace(/[\/\?]$/, '');  // remove trailing ? or /
-    pathname = pathname.replace(/^[\/]/, '');  // remove initial /
+    pathname = pathname.replace(/[\/\?]$/, '');
+    pathname = pathname.replace(/^[\/]/, '');
     pathname = decodeURIComponent(pathname);
-    // es6 dict comprehension to decode query values
     query = Object.entries(query).reduce((obj, [k, v]) => { obj[k] = decodeURIComponent(v); return obj; }, {});
     for (let r of this._routes) {
       if (r.apply({ pathname, query, url }, fromOutside)) { break; }
