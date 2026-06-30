@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <CoreSpotlight/CoreSpotlight.h>
 #import <React/RCTBridgeModule.h>
 
@@ -44,6 +45,17 @@ RCT_EXPORT_MODULE();
   [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
++ (UIApplicationShortcutIcon *)shortcutIconForName:(NSString *)name
+{
+  if ([name isEqualToString:@"search"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeSearch]; }
+  if ([name isEqualToString:@"play"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypePlay]; }
+  if ([name isEqualToString:@"bookmark"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeBookmark]; }
+  if ([name isEqualToString:@"history"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeTime]; }
+  if ([name isEqualToString:@"settings"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeCompose]; }
+  if ([name isEqualToString:@"shuffle"]) { return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeShuffle]; }
+  return [UIApplicationShortcutIcon iconWithType:UIApplicationShortcutIconTypeBookmark];
+}
+
 RCT_REMAP_METHOD(isIndexingAvailable,
                  isIndexingAvailableWithResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
@@ -65,6 +77,43 @@ RCT_REMAP_METHOD(updateAppState,
   [SpotlightIndexer saveJSONDictionary:mutableState key:SefariaIntentStateKey];
   NSLog(@"[SefariaIntentsStore] Saved current app state for shortcuts");
   resolve(@{@"saved": @YES});
+}
+
+RCT_REMAP_METHOD(updateQuickActions,
+                 updateQuickActions:(NSArray *)items
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+  if (![items isKindOfClass:[NSArray class]]) {
+    resolve(@{@"updated": @NO, @"count": @0});
+    return;
+  }
+
+  NSMutableArray<UIApplicationShortcutItem *> *shortcutItems = [NSMutableArray array];
+  for (NSDictionary *item in items) {
+    if (![item isKindOfClass:[NSDictionary class]]) { continue; }
+    NSString *type = [item[@"type"] isKindOfClass:[NSString class]] ? item[@"type"] : @"org.sefaria.quick.action";
+    NSString *title = [item[@"title"] isKindOfClass:[NSString class]] ? item[@"title"] : @"Sefaria";
+    NSString *subtitle = [item[@"subtitle"] isKindOfClass:[NSString class]] ? item[@"subtitle"] : nil;
+    NSString *url = [item[@"url"] isKindOfClass:[NSString class]] ? item[@"url"] : @"";
+    NSString *iconName = [item[@"icon"] isKindOfClass:[NSString class]] ? item[@"icon"] : @"bookmark";
+    NSDictionary *userInfo = url.length > 0 ? @{@"url": url} : @{};
+
+    UIApplicationShortcutItem *shortcut = [[UIApplicationShortcutItem alloc]
+      initWithType:type
+      localizedTitle:title
+      localizedSubtitle:subtitle
+      icon:[SpotlightIndexer shortcutIconForName:iconName]
+      userInfo:userInfo];
+    [shortcutItems addObject:shortcut];
+    if (shortcutItems.count >= 4) { break; }
+  }
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [UIApplication sharedApplication].shortcutItems = shortcutItems;
+    NSLog(@"[SefariaQuickActions] Updated %lu dynamic Home Screen quick actions", (unsigned long)shortcutItems.count);
+    resolve(@{@"updated": @YES, @"count": @(shortcutItems.count)});
+  });
 }
 
 RCT_REMAP_METHOD(getCurrentAppState,
