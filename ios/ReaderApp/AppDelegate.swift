@@ -40,6 +40,20 @@ class AppDelegate: ExpoAppDelegate {
       || result
   }
 
+  override func application(_ application: UIApplication,
+                            performActionFor shortcutItem: UIApplicationShortcutItem,
+                            completionHandler: @escaping (Bool) -> Void) {
+    let urlString = shortcutItem.userInfo?["url"] as? String
+    if let urlString = urlString, let url = URL(string: urlString) {
+      NSLog("[SefariaQuickActions] Opening quick action \(shortcutItem.type): \(urlString)")
+      let handled = self.application(application, open: url, options: [:])
+      completionHandler(handled)
+      return
+    }
+    NSLog("[SefariaQuickActions] Quick action had no URL: \(shortcutItem.type)")
+    completionHandler(false)
+  }
+
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
