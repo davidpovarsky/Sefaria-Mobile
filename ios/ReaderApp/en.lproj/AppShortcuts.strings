@@ -1,0 +1,75 @@
+"intent.get_current_state.title" = "Get Current Sefaria State";
+"intent.get_current_state.description" = "Returns the current visible state saved by the Sefaria app.";
+
+"intent.get_current_ref.title" = "Get Current Sefaria Ref";
+"intent.get_current_ref.description" = "Returns the current ref open in the Sefaria app.";
+
+"intent.get_current_ref_url.title" = "Get Current Sefaria Ref URL";
+"intent.get_current_ref_url.description" = "Returns the Sefaria URL for the current ref.";
+
+"intent.open_ref.title" = "Open Sefaria Ref";
+"intent.open_ref.description" = "Opens a Sefaria ref in the app.";
+
+"intent.open_search.title" = "Open Sefaria Search";
+"intent.open_search.description" = "Opens the Sefaria app search screen with a query.";
+
+"intent.find_sources.title" = "Find Sefaria Sources";
+"intent.find_sources.description" = "Searches the local Sefaria source index cache.";
+
+"intent.find_sources_author.title" = "Find Sefaria Sources by Author";
+"intent.find_sources_author.description" = "Returns sources whose author field matches the query.";
+
+"intent.find_sources_category.title" = "Find Sefaria Sources in Category";
+"intent.find_sources_category.description" = "Returns sources whose path or category matches the query.";
+
+"intent.search_texts.title" = "Search Sefaria Texts";
+"intent.search_texts.description" = "Runs a Sefaria search in the background and returns results to Shortcuts.";
+
+"intent.lookup_name.title" = "Lookup Sefaria Name";
+"intent.lookup_name.description" = "Autocompletes refs, book titles, authors, topics, collections, categories, terms, and people using Sefaria's Name API.";
+
+"entity.source.name" = "Sefaria Source";
+"entity.search_result.name" = "Sefaria Search Result";
+"entity.name_result.name" = "Sefaria Name Result";
+
+"param.query" = "Query";
+"param.limit" = "Limit";
+"param.ref" = "Ref";
+"param.author" = "Author";
+"param.category" = "Category";
+"param.name" = "Name";
+"param.type" = "Type";
+"param.type_filter" = "Type Filter";
+"param.field" = "Field";
+"param.size" = "Size";
+"param.slop" = "Slop";
+"param.filters" = "Filters";
+"param.filter_fields" = "Filter Fields";
+"param.sort_method" = "Sort Method";
+"param.sort_fields" = "Sort Fields";
+"param.sort_reverse" = "Sort Reverse";
+"param.sort_score_missing" = "Sort Score Missing";
+"param.source_projection" = "Source Projection";
+"param.aggregations" = "Aggregations";
+
+"shortcut.get_current_state.phrase" = "Get current state in ${applicationName}";
+"shortcut.get_current_ref.phrase" = "Get current ref in ${applicationName}";
+"shortcut.get_current_ref_url.phrase" = "Get current ref URL in ${applicationName}";
+"shortcut.open_ref.phrase" = "Open ref in ${applicationName}";
+"shortcut.open_search.phrase" = "Open search in ${applicationName}";
+"shortcut.find_sources.phrase" = "Find sources in ${applicationName}";
+"shortcut.find_sources_author.phrase" = "Find sources by author in ${applicationName}";
+"shortcut.find_sources_category.phrase" = "Find sources in category in ${applicationName}";
+"shortcut.search_texts.phrase" = "Search texts in ${applicationName}";
+"shortcut.lookup_name.phrase" = "Lookup name in ${applicationName}";
+
+"Get current state in ${applicationName}" = "Get current state in ${applicationName}";
+"Get current ref in ${applicationName}" = "Get current ref in ${applicationName}";
+"Get current ref URL in ${applicationName}" = "Get current ref URL in ${applicationName}";
+"Open ref in ${applicationName}" = "Open ref in ${applicationName}";
+"Open search in ${applicationName}" = "Open search in ${applicationName}";
+"Find sources in ${applicationName}" = "Find sources in ${applicationName}";
+"Find sources by author in ${applicationName}" = "Find sources by author in ${applicationName}";
+"Find sources in category in ${applicationName}" = "Find sources in category in ${applicationName}";
+"Search texts in ${applicationName}" = "Search texts in ${applicationName}";
+"Lookup name in ${applicationName}" = "Lookup name in ${applicationName}";

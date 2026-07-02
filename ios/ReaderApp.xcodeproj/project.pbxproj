@@ -31,6 +31,7 @@
 		07779F3A233A760000196F02 /* libRNCAsyncStorage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 07779F39233A760000196F02 /* libRNCAsyncStorage.a */; };
 		0797D0F029069DED00BC63DB /* SertoBatnan.otf in Resources */ = {isa = PBXBuildFile; fileRef = 0797D0A429069DED00BC63DB /* SertoBatnan.otf */; };
 		07D65042270991F300889F10 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 07D65044270991F300889F10 /* InfoPlist.strings */; };
+		07D650502709920700889F10 /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 07D650532709920700889F10 /* AppShortcuts.strings */; };
 		07E16B252DC9F1D200472B94 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 07E16B242DC9F1D200472B94 /* PrivacyInfo.xcprivacy */; };
 		07FFB4592DCB393B00A4B8B8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FFB4582DCB393B00A4B8B8 /* AppDelegate.swift */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -1266,6 +1267,8 @@
 		07D50AC6227EC64D00A73C52 /* ReaderApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = ReaderApp.entitlements; path = ReaderApp/ReaderApp.entitlements; sourceTree = "<group>"; };
 		07D650492709920700889F10 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		07D6504A2709924400889F10 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = he.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		07D650512709920700889F10 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = ReaderApp/en.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
+		07D650522709920700889F10 /* he */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = he; path = ReaderApp/he.lproj/AppShortcuts.strings; sourceTree = "<group>"; };
 		07E16B242DC9F1D200472B94 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		07FFB4582DCB393B00A4B8B8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = ReaderApp/AppDelegate.swift; sourceTree = "<group>"; };
 		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
@@ -19333,6 +19336,7 @@
 				07E16B242DC9F1D200472B94 /* PrivacyInfo.xcprivacy */,
 				075722F927BE8A5F009B7C54 /* yo.swift */,
 				07D65044270991F300889F10 /* InfoPlist.strings */,
+				07D650532709920700889F10 /* AppShortcuts.strings */,
 				07204FCA24E13B18009CA4A0 /* Launch Screen.storyboard */,
 				075C8CF12705D9500042325D /* Launch Screen_he.storyboard */,
 				E5401A0C22C6CFCB00B2FAE8 /* GoogleService-Info.plist */,
@@ -51857,6 +51861,7 @@
 				075C8D452705DC2C0042325D /* two1536x2048_he.png in Resources */,
 				0761D1A8207DD4F80011FE47 /* sources in Resources */,
 				07D65042270991F300889F10 /* InfoPlist.strings in Resources */,
+				07D650502709920700889F10 /* AppShortcuts.strings in Resources */,
 				0761D1BB207DD6200011FE47 /* OpenSans-Light.ttf in Resources */,
 				07E16B252DC9F1D200472B94 /* PrivacyInfo.xcprivacy in Resources */,
 				0761D1BC207DD6200011FE47 /* Amiri-Slanted.ttf in Resources */,
@@ -52149,6 +52154,15 @@
 				07D6504A2709924400889F10 /* he */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		07D650532709920700889F10 /* AppShortcuts.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				07D650512709920700889F10 /* en */,
+				07D650522709920700889F10 /* he */,
+			);
+			name = AppShortcuts.strings;
 			sourceTree = "<group>";
 		};
 		ABDA8C1E250FB4D400635791 /* toc.zip */ = {

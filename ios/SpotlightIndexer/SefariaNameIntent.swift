@@ -3,7 +3,7 @@ import AppIntents
 
 @available(iOS 16.0, *)
 struct SefariaNameResult: Identifiable, Hashable, Codable, AppEntity {
-  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Sefaria Name Result")
+  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("entity.name_result.name", table: "AppShortcuts"))
   static var defaultQuery = SefariaNameResultQuery()
 
   let id: String
@@ -29,12 +29,12 @@ struct SefariaNameResultQuery: EntityQuery {
 
 @available(iOS 16.0, *)
 struct LookupSefariaNameIntent: AppIntent {
-  static var title: LocalizedStringResource = "Lookup Sefaria Name"
-  static var description = IntentDescription("Autocompletes refs, book titles, authors, topics, collections, categories, terms, and people using Sefaria's Name API.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.lookup_name.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.lookup_name.description", table: "AppShortcuts"))
 
-  @Parameter(title: "Name") var name: String
-  @Parameter(title: "Limit", default: 10) var limit: Int
-  @Parameter(title: "Type Filter", default: "") var type: String
+  @Parameter(title: LocalizedStringResource("param.name", table: "AppShortcuts")) var name: String
+  @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
+  @Parameter(title: LocalizedStringResource("param.type_filter", table: "AppShortcuts"), default: "") var type: String
 
   func perform() async throws -> some IntentResult & ReturnsValue<[SefariaNameResult]> {
     let encodedName = name.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? name

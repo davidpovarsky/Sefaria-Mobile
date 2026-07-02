@@ -4,7 +4,7 @@ import UIKit
 
 @available(iOS 16.0, *)
 struct SefariaIntentSource: Identifiable, Hashable, Codable, AppEntity {
-  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Sefaria Source")
+  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("entity.source.name", table: "AppShortcuts"))
   static var defaultQuery = SefariaSourceQuery()
 
   let id: String
@@ -25,7 +25,7 @@ struct SefariaIntentSource: Identifiable, Hashable, Codable, AppEntity {
 
 @available(iOS 16.0, *)
 struct SefariaSearchResult: Identifiable, Hashable, Codable, AppEntity {
-  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "Sefaria Search Result")
+  static var typeDisplayRepresentation = TypeDisplayRepresentation(name: LocalizedStringResource("entity.search_result.name", table: "AppShortcuts"))
   static var defaultQuery = SefariaSearchResultQuery()
 
   let id: String
@@ -71,7 +71,7 @@ struct SefariaSearchResultQuery: EntityQuery {
 struct SefariaIntentStore {
   static let sourcesKey = "SefariaIntentSourcesV1"
   static let stateKey = "SefariaIntentCurrentStateV1"
-  static let baseURL = "https://www.sefaria.org/"
+  static let baseURL = "sefariareader://www.sefaria.org/"
 
   static func readJSONArray(key: String) -> [[String: Any]] {
     guard let data = UserDefaults.standard.data(forKey: key) else { return [] }
@@ -231,8 +231,8 @@ struct SefariaIntentStore {
 
 @available(iOS 16.0, *)
 struct GetCurrentSefariaStateIntent: AppIntent {
-  static var title: LocalizedStringResource = "Get Current Sefaria State"
-  static var description = IntentDescription("Returns the current visible state saved by the Sefaria app: tab, book, ref, search, history/saved state, and language.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.get_current_state.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.get_current_state.description", table: "AppShortcuts"))
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> {
     .result(value: SefariaIntentStore.stateString())
@@ -241,8 +241,8 @@ struct GetCurrentSefariaStateIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct GetCurrentSefariaRefIntent: AppIntent {
-  static var title: LocalizedStringResource = "Get Current Sefaria Ref"
-  static var description = IntentDescription("Returns the current ref open in the Sefaria app.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.get_current_ref.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.get_current_ref.description", table: "AppShortcuts"))
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> {
     .result(value: SefariaIntentStore.currentRef())
@@ -251,8 +251,8 @@ struct GetCurrentSefariaRefIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct GetCurrentSefariaRefURLIntent: AppIntent {
-  static var title: LocalizedStringResource = "Get Current Sefaria Ref URL"
-  static var description = IntentDescription("Returns the Sefaria URL for the current ref.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.get_current_ref_url.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.get_current_ref_url.description", table: "AppShortcuts"))
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> {
     .result(value: SefariaIntentStore.currentURL())
@@ -261,11 +261,11 @@ struct GetCurrentSefariaRefURLIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct OpenSefariaRefIntent: AppIntent {
-  static var title: LocalizedStringResource = "Open Sefaria Ref"
-  static var description = IntentDescription("Opens a full Sefaria ref in the app, including chapter, page, segment, or range when supplied.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.open_ref.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.open_ref.description", table: "AppShortcuts"))
   static var openAppWhenRun: Bool = true
 
-  @Parameter(title: "Ref") var ref: String
+  @Parameter(title: LocalizedStringResource("param.ref", table: "AppShortcuts")) var ref: String
 
   func perform() async throws -> some IntentResult {
     await SefariaIntentStore.open(urlString: SefariaIntentStore.url(forRef: ref))
@@ -275,11 +275,11 @@ struct OpenSefariaRefIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct OpenSefariaSearchIntent: AppIntent {
-  static var title: LocalizedStringResource = "Open Sefaria Search"
-  static var description = IntentDescription("Opens the Sefaria app search screen with a query.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.open_search.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.open_search.description", table: "AppShortcuts"))
   static var openAppWhenRun: Bool = true
 
-  @Parameter(title: "Query") var query: String
+  @Parameter(title: LocalizedStringResource("param.query", table: "AppShortcuts")) var query: String
 
   func perform() async throws -> some IntentResult {
     await SefariaIntentStore.open(urlString: SefariaIntentStore.searchURL(query: query))
@@ -289,11 +289,11 @@ struct OpenSefariaSearchIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct FindSefariaSourcesIntent: AppIntent {
-  static var title: LocalizedStringResource = "Find Sefaria Sources"
-  static var description = IntentDescription("Searches the local Sefaria source index cache and returns matching sources without opening the app.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.find_sources.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.find_sources.description", table: "AppShortcuts"))
 
-  @Parameter(title: "Query") var query: String
-  @Parameter(title: "Limit", default: 10) var limit: Int
+  @Parameter(title: LocalizedStringResource("param.query", table: "AppShortcuts")) var query: String
+  @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
   func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
     .result(value: Array(SefariaIntentStore.findSources(query: query, limit: limit)))
@@ -302,11 +302,11 @@ struct FindSefariaSourcesIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct FindSefariaSourcesByAuthorIntent: AppIntent {
-  static var title: LocalizedStringResource = "Find Sefaria Sources by Author"
-  static var description = IntentDescription("Returns sources whose author field matches the query.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.find_sources_author.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.find_sources_author.description", table: "AppShortcuts"))
 
-  @Parameter(title: "Author") var author: String
-  @Parameter(title: "Limit", default: 10) var limit: Int
+  @Parameter(title: LocalizedStringResource("param.author", table: "AppShortcuts")) var author: String
+  @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
   func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
     let q = author.lowercased()
@@ -317,42 +317,16 @@ struct FindSefariaSourcesByAuthorIntent: AppIntent {
 
 @available(iOS 16.0, *)
 struct FindSefariaSourcesInCategoryIntent: AppIntent {
-  static var title: LocalizedStringResource = "Find Sefaria Sources in Category"
-  static var description = IntentDescription("Returns sources whose path/category matches the query.")
+  static var title: LocalizedStringResource = LocalizedStringResource("intent.find_sources_category.title", table: "AppShortcuts")
+  static var description = IntentDescription(LocalizedStringResource("intent.find_sources_category.description", table: "AppShortcuts"))
 
-  @Parameter(title: "Category") var category: String
-  @Parameter(title: "Limit", default: 10) var limit: Int
+  @Parameter(title: LocalizedStringResource("param.category", table: "AppShortcuts")) var category: String
+  @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
   func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
     let q = category.lowercased()
     let results = SefariaIntentStore.sources().filter { $0.path.lowercased().contains(q) }
     return .result(value: Array(results.prefix(limit)))
-  }
-}
-
-@available(iOS 16.0, *)
-struct SearchSefariaTextsIntent: AppIntent {
-  static var title: LocalizedStringResource = "Search Sefaria Texts"
-  static var description = IntentDescription("Runs an online Sefaria text search in the background and returns results to Shortcuts.")
-
-  @Parameter(title: "Query") var query: String
-  @Parameter(title: "Limit", default: 10) var limit: Int
-
-  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaSearchResult]> {
-    let results = await SefariaIntentStore.searchTexts(query: query, limit: limit)
-    return .result(value: results)
-  }
-}
-
-@available(iOS 16.0, *)
-struct RebuildSefariaSourceCacheIntent: AppIntent {
-  static var title: LocalizedStringResource = "Rebuild Sefaria Source Cache"
-  static var description = IntentDescription("Opens the app so the Spotlight/source cache can be rebuilt from the current Sefaria index.")
-  static var openAppWhenRun: Bool = true
-
-  func perform() async throws -> some IntentResult & ProvidesDialog {
-    await SefariaIntentStore.open(urlString: SefariaIntentStore.baseURL)
-    return .result(dialog: "Open Settings > Spotlight Search, then tap Update / Rebuild Spotlight Index.")
   }
 }
 
@@ -368,6 +342,6 @@ struct SefariaShortcutsProvider: AppShortcutsProvider {
     AppShortcut(intent: FindSefariaSourcesByAuthorIntent(), phrases: ["Find sources by author in \(.applicationName)"])
     AppShortcut(intent: FindSefariaSourcesInCategoryIntent(), phrases: ["Find sources in category in \(.applicationName)"])
     AppShortcut(intent: SearchSefariaTextsIntent(), phrases: ["Search texts in \(.applicationName)"])
-    AppShortcut(intent: RebuildSefariaSourceCacheIntent(), phrases: ["Rebuild source cache in \(.applicationName)"])
+    AppShortcut(intent: LookupSefariaNameIntent(), phrases: ["Lookup name in \(.applicationName)"])
   }
 }

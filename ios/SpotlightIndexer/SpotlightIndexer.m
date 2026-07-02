@@ -89,6 +89,7 @@ RCT_REMAP_METHOD(updateQuickActions,
     return;
   }
 
+  NSUInteger attemptedCount = items.count;
   NSMutableArray<UIApplicationShortcutItem *> *shortcutItems = [NSMutableArray array];
   for (NSDictionary *item in items) {
     if (![item isKindOfClass:[NSDictionary class]]) { continue; }
@@ -106,13 +107,13 @@ RCT_REMAP_METHOD(updateQuickActions,
       icon:[SpotlightIndexer shortcutIconForName:iconName]
       userInfo:userInfo];
     [shortcutItems addObject:shortcut];
-    if (shortcutItems.count >= 4) { break; }
+    if (shortcutItems.count >= 8) { break; }
   }
 
   dispatch_async(dispatch_get_main_queue(), ^{
     [UIApplication sharedApplication].shortcutItems = shortcutItems;
-    NSLog(@"[SefariaQuickActions] Updated %lu dynamic Home Screen quick actions", (unsigned long)shortcutItems.count);
-    resolve(@{@"updated": @YES, @"count": @(shortcutItems.count)});
+    NSLog(@"[SefariaQuickActions] Attempted %lu, updated %lu dynamic Home Screen quick actions", (unsigned long)attemptedCount, (unsigned long)shortcutItems.count);
+    resolve(@{@"updated": @YES, @"attempted": @(attemptedCount), @"count": @(shortcutItems.count)});
   });
 }
 

@@ -1,0 +1,75 @@
+"intent.get_current_state.title" = "קבלת מצב ספריא נוכחי";
+"intent.get_current_state.description" = "מחזיר את המצב הנוכחי שנשמר מאפליקציית ספריא.";
+
+"intent.get_current_ref.title" = "קבלת המקור הנוכחי";
+"intent.get_current_ref.description" = "מחזיר את המקור הפתוח עכשיו באפליקציית ספריא.";
+
+"intent.get_current_ref_url.title" = "קבלת קישור למקור הנוכחי";
+"intent.get_current_ref_url.description" = "מחזיר קישור ספריא למקור הנוכחי.";
+
+"intent.open_ref.title" = "פתיחת מקור בספריא";
+"intent.open_ref.description" = "פותח מקור באפליקציית ספריא.";
+
+"intent.open_search.title" = "פתיחת חיפוש בספריא";
+"intent.open_search.description" = "פותח את מסך החיפוש באפליקציית ספריא עם שאילתה.";
+
+"intent.find_sources.title" = "חיפוש מקורות בספריא";
+"intent.find_sources.description" = "מחפש במטמון המקומי של מקורות ספריא.";
+
+"intent.find_sources_author.title" = "חיפוש מקורות לפי מחבר";
+"intent.find_sources_author.description" = "מחזיר מקורות ששדה המחבר שלהם מתאים לחיפוש.";
+
+"intent.find_sources_category.title" = "חיפוש מקורות לפי קטגוריה";
+"intent.find_sources_category.description" = "מחזיר מקורות שהנתיב או הקטגוריה שלהם מתאימים לחיפוש.";
+
+"intent.search_texts.title" = "חיפוש בטקסטים של ספריא";
+"intent.search_texts.description" = "מריץ חיפוש בספריא ברקע ומחזיר תוצאות לקיצורי הדרך.";
+
+"intent.lookup_name.title" = "השלמת שם בספריא";
+"intent.lookup_name.description" = "משלים מקורות, ספרים, מחברים, נושאים, אוספים, קטגוריות, מונחים ואנשים באמצעות Name API של ספריא.";
+
+"entity.source.name" = "מקור ספריא";
+"entity.search_result.name" = "תוצאת חיפוש בספריא";
+"entity.name_result.name" = "תוצאת שם בספריא";
+
+"param.query" = "שאילתה";
+"param.limit" = "מגבלה";
+"param.ref" = "מקור";
+"param.author" = "מחבר";
+"param.category" = "קטגוריה";
+"param.name" = "שם";
+"param.type" = "סוג";
+"param.type_filter" = "סינון לפי סוג";
+"param.field" = "שדה";
+"param.size" = "כמות תוצאות";
+"param.slop" = "מרווח";
+"param.filters" = "מסננים";
+"param.filter_fields" = "שדות סינון";
+"param.sort_method" = "שיטת מיון";
+"param.sort_fields" = "שדות מיון";
+"param.sort_reverse" = "מיון הפוך";
+"param.sort_score_missing" = "ציון חסר במיון";
+"param.source_projection" = "החזרת שדות מקור";
+"param.aggregations" = "קיבוצים";
+
+"shortcut.get_current_state.phrase" = "קבל מצב נוכחי ב־${applicationName}";
+"shortcut.get_current_ref.phrase" = "קבל מקור נוכחי ב־${applicationName}";
+"shortcut.get_current_ref_url.phrase" = "קבל קישור למקור נוכחי ב־${applicationName}";
+"shortcut.open_ref.phrase" = "פתח מקור ב־${applicationName}";
+"shortcut.open_search.phrase" = "פתח חיפוש ב־${applicationName}";
+"shortcut.find_sources.phrase" = "חפש מקורות ב־${applicationName}";
+"shortcut.find_sources_author.phrase" = "חפש מקורות לפי מחבר ב־${applicationName}";
+"shortcut.find_sources_category.phrase" = "חפש מקורות לפי קטגוריה ב־${applicationName}";
+"shortcut.search_texts.phrase" = "חפש בטקסטים ב־${applicationName}";
+"shortcut.lookup_name.phrase" = "השלם שם ב־${applicationName}";
+
+"Get current state in ${applicationName}" = "קבל מצב נוכחי ב־${applicationName}";
+"Get current ref in ${applicationName}" = "קבל מקור נוכחי ב־${applicationName}";
+"Get current ref URL in ${applicationName}" = "קבל קישור למקור נוכחי ב־${applicationName}";
+"Open ref in ${applicationName}" = "פתח מקור ב־${applicationName}";
+"Open search in ${applicationName}" = "פתח חיפוש ב־${applicationName}";
+"Find sources in ${applicationName}" = "חפש מקורות ב־${applicationName}";
+"Find sources by author in ${applicationName}" = "חפש מקורות לפי מחבר ב־${applicationName}";
+"Find sources in category in ${applicationName}" = "חפש מקורות לפי קטגוריה ב־${applicationName}";
+"Search texts in ${applicationName}" = "חפש בטקסטים ב־${applicationName}";
+"Lookup name in ${applicationName}" = "השלם שם ב־${applicationName}";

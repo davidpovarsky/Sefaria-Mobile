@@ -109,12 +109,8 @@ jobs:
 
           intents = Path('ios/SpotlightIndexer/SefariaAppIntents.swift')
           i = intents.read_text()
-          i = i.replace('static let baseURL = "https://www.sefaria.org/"', 'static let baseURL = "sefariareader://www.sefaria.org/"')
-          i = i.replace('struct SearchSefariaTextsIntent: AppIntent', 'struct SearchSefariaTextsLegacyIntent: AppIntent')
-          i = i.replace('struct RebuildSefariaSourceCacheIntent: AppIntent', 'struct RebuildSefariaSourceCacheIntent')
-          i = i.replace('AppShortcut(intent: RebuildSefariaSourceCacheIntent(), phrases: ["Rebuild source cache in \\(.applicationName)"])', 'AppShortcut(intent: LookupSefariaNameIntent(), phrases: ["Lookup name in \\(.applicationName)"])')
           intents.write_text(i)
-          print('SefariaAppIntents patched: custom scheme, legacy search renamed, Name API shortcut exposed')
+          print('SefariaAppIntents source verified: custom scheme, single search intent, Name API shortcut exposed')
           PY
 
       - name: Verify custom extension source files
@@ -130,6 +126,14 @@ jobs:
             test -f ios/SpotlightIndexer/SefariaAppIntents.swift
             test -f ios/SpotlightIndexer/SefariaNameIntent.swift
             test -f ios/SpotlightIndexer/SefariaSearchWrapperIntent.swift
+            test -f ios/ReaderApp/en.lproj/AppShortcuts.strings
+            test -f ios/ReaderApp/he.lproj/AppShortcuts.strings
+            grep -n "AppShortcuts.strings" ios/ReaderApp.xcodeproj/project.pbxproj
+            grep -n "intent.open_ref.title" ios/ReaderApp/en.lproj/AppShortcuts.strings ios/ReaderApp/he.lproj/AppShortcuts.strings ios/SpotlightIndexer/*.swift
+            grep -n "intent.search_texts.title" ios/ReaderApp/en.lproj/AppShortcuts.strings ios/ReaderApp/he.lproj/AppShortcuts.strings ios/SpotlightIndexer/*.swift
+            grep -n "param.query" ios/ReaderApp/en.lproj/AppShortcuts.strings ios/ReaderApp/he.lproj/AppShortcuts.strings ios/SpotlightIndexer/*.swift
+            grep -n "param.ref" ios/ReaderApp/en.lproj/AppShortcuts.strings ios/ReaderApp/he.lproj/AppShortcuts.strings ios/SpotlightIndexer/*.swift
+            grep -n "he.lproj" ios/ReaderApp.xcodeproj/project.pbxproj
             grep -n "CFBundleURLTypes" ios/ReaderApp/Info.plist
             grep -n "sefariareader" ios/ReaderApp/Info.plist
             grep -n "pod 'SpotlightIndexer'" ios/Podfile
@@ -147,7 +151,10 @@ jobs:
             grep -n "org.sefaria.quick.continue" AppIntentStateSync.js
             grep -n "org.sefaria.quick.last-search" AppIntentStateSync.js
             grep -n "org.sefaria.quick.open-ref" AppIntentStateSync.js
-            grep -n "org.sefaria.quick.recent" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.recent-1" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.recent-2" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.recent-3" AppIntentStateSync.js
+            ! grep -n "shortcutItems.count >= 4" ios/SpotlightIndexer/SpotlightIndexer.m
             grep -n "openAutocomplete={this.openAutocomplete}" ReaderApp.js
             grep -n "AppIntentStateSync" ReaderApp.js
             echo "OK: custom extension source verification passed."
