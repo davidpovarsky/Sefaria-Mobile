@@ -121,6 +121,7 @@ jobs:
             test -f SpotlightIndexing.js
             test -f SpotlightSettingsPanel.js
             test -f AppIntentStateSync.js
+            test -f DocumentRecentsSync.js
             test -f ios/SpotlightIndexer/SpotlightIndexer.podspec
             test -f ios/SpotlightIndexer/SpotlightIndexer.m
             test -f ios/SpotlightIndexer/SefariaAppIntents.swift
@@ -148,6 +149,14 @@ jobs:
             grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
             grep -n "updateAppState" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
             grep -n "updateQuickActions" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
+            grep -n "DocumentRecentsSync" ReaderApp.js .github/workflows/ios-ipa.yml || true
+            grep -n "recordRecentRefDocument" ios/SpotlightIndexer/SpotlightIndexer.m
+            grep -n "recordRecentSearchDocument" ios/SpotlightIndexer/SpotlightIndexer.m
+            grep -n "SefariaDocumentRecents" ios/SpotlightIndexer/SpotlightIndexer.m ios/ReaderApp/AppDelegate.swift DocumentRecentsSync.js
+            grep -n "sefref" ios/ReaderApp/Info.plist ios/ReaderApp/AppDelegate.swift
+            grep -n "sefsearch" ios/ReaderApp/Info.plist ios/ReaderApp/AppDelegate.swift
+            grep -n "UTExportedTypeDeclarations" ios/ReaderApp/Info.plist
+            grep -n "CFBundleDocumentTypes" ios/ReaderApp/Info.plist
             grep -n "org.sefaria.quick.continue" AppIntentStateSync.js
             grep -n "org.sefaria.quick.last-search" AppIntentStateSync.js
             grep -n "org.sefaria.quick.open-ref" AppIntentStateSync.js

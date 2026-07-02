@@ -16,8 +16,32 @@ class AppDelegate: ExpoAppDelegate {
   var reactNativeFactory: RCTReactNativeFactory?
 
   override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    if url.isFileURL && (url.pathExtension == "sefref" || url.pathExtension == "sefsearch") {
+      return routeSefariaRecentDocument(app, fileURL: url, options: options)
+    }
     return super.application(app, open: url, options: options)
       || RCTLinkingManager.application(app, open: url, options: options)
+  }
+
+  private func routeSefariaRecentDocument(_ app: UIApplication, fileURL url: URL, options: [UIApplication.OpenURLOptionsKey : Any]) -> Bool {
+    NSLog("[SefariaDocumentRecents] Opening recent document: \(url.path)")
+    do {
+      let data = try Data(contentsOf: url)
+      guard
+        let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+        let urlString = json["url"] as? String,
+        let deepLinkURL = URL(string: urlString),
+        !deepLinkURL.isFileURL
+      else {
+        NSLog("[SefariaDocumentRecents] Could not route recent document: missing or invalid url")
+        return false
+      }
+      NSLog("[SefariaDocumentRecents] Routing document to: \(deepLinkURL.absoluteString)")
+      return RCTLinkingManager.application(app, open: deepLinkURL, options: options)
+    } catch {
+      NSLog("[SefariaDocumentRecents] Failed to read recent document: \(error.localizedDescription)")
+      return false
+    }
   }
 
   override func application(

@@ -59,6 +59,8 @@ import {
 } from "./DownloadControl.js"
 import { initAnalytics, trackCurrentScreen, trackEvent, trackPageview } from './analytics/events';
 import CrashlyticsService from './analytics/crashlytics';
+import AppIntentStateSync from './AppIntentStateSync';
+import DocumentRecentsSync from './DocumentRecentsSync';
 import {
   LoadingView,
   CategoryColorLine,
@@ -412,6 +414,8 @@ class ReaderApp extends React.PureComponent {
   pendingIncrement = 1;
 
   componentDidUpdate(prevProps, prevState) {
+    AppIntentStateSync.updateFromReaderApp(this.state, this.props);
+    DocumentRecentsSync.updateFromReaderApp(this.state, this.props);
     // Should track pageview? TODO account for infinite
     if (this.state.menuOpen          !== prevState.menuOpen          ||
         this.state.textTitle         !== prevState.textTitle         ||
