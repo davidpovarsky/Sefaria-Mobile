@@ -143,6 +143,12 @@ jobs:
             grep -n "SpotlightSettingsPanel" SettingsPage.js
             grep -n "NativeModules.SpotlightIndexer" SpotlightIndexing.js
             grep -n "updateAppState" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
+            grep -n "updateQuickActions" ios/SpotlightIndexer/SpotlightIndexer.m AppIntentStateSync.js
+            grep -n "org.sefaria.quick.continue" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.last-search" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.open-ref" AppIntentStateSync.js
+            grep -n "org.sefaria.quick.recent" AppIntentStateSync.js
+            grep -n "openAutocomplete={this.openAutocomplete}" ReaderApp.js
             grep -n "AppIntentStateSync" ReaderApp.js
             echo "OK: custom extension source verification passed."
           } 2>&1 | tee build-logs/00e-custom-extension-source-check.log

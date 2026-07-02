@@ -2320,6 +2320,7 @@ class ReaderApp extends React.PureComponent {
             openRef={this.openRef}
             openUri={this.openUri}
             openSearch={this.openSearch}
+            openAutocomplete={this.openAutocomplete}
             openTopic={this.openTopic}
             setSearchOptions={this.setSearchOptions}
             openTextTocDirectly={this.openTextTocDirectly}

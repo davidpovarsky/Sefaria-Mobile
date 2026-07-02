@@ -31,6 +31,45 @@ const searchToAppURL = query => {
 
 const quickURL = action => `${APP_URL_BASE}__quick/${action}`;
 
+const isHebrewInterface = interfaceLanguage => {
+  const lang = String(interfaceLanguage || '').toLowerCase();
+  return lang.startsWith('he') || lang.startsWith('iw');
+};
+
+const labelsFor = interfaceLanguage => {
+  const he = isHebrewInterface(interfaceLanguage);
+  return he ? {
+    continueReading: 'המשך קריאה',
+    lastSearch: 'חיפוש אחרון',
+    search: 'חיפוש',
+    openRef: 'פתיחת מקור',
+    recentSources: 'מקורות אחרונים',
+    settings: 'הגדרות',
+    randomSource: 'מקור אקראי',
+    searchSubtitle: 'חיפוש בטקסטים',
+    openRefSubtitle: 'פתיחת מקור',
+    recentSourcesSubtitle: 'פתיחת מקורות אחרונים',
+  } : {
+    continueReading: 'Continue Reading',
+    lastSearch: 'Last Search',
+    search: 'Search',
+    openRef: 'Open Ref',
+    recentSources: 'Recent Sources',
+    settings: 'Settings',
+    randomSource: 'Random Source',
+    searchSubtitle: 'Search Sefaria texts',
+    openRefSubtitle: 'Lookup a source',
+    recentSourcesSubtitle: 'Open recent sources',
+  };
+};
+
+const displayRefForHistoryItem = (item, interfaceLanguage) => {
+  if (isHebrewInterface(interfaceLanguage)) {
+    return item.he_ref || item.heRef || item.heSegmentRef || item.ref || '';
+  }
+  return item.ref || '';
+};
+
 const makeSnapshot = (state, props) => {
   const isSearchOpen = state.menuOpen === 'search';
   const isHistoryOpen = state.menuOpen === 'menu' || state.menuOpen === 'history';
@@ -65,13 +104,11 @@ const makeSnapshot = (state, props) => {
   };
 };
 
-const historyItems = () => {
+const latestHistoryItem = () => {
   try {
-    return (Sefaria.history?.lastPlace || [])
-      .filter(item => item && item.ref)
-      .slice(0, 6);
+    return (Sefaria.history?.lastPlace || []).find(item => item && item.ref);
   } catch (e) {
-    return [];
+    return null;
   }
 };
 
@@ -82,77 +119,58 @@ const addUnique = (items, item) => {
 
 const buildQuickActions = snapshot => {
   const actions = [];
+  const labels = labelsFor(snapshot.interfaceLanguage);
   const lastSearch = String(snapshot.searchQuery || '').trim();
+  const latest = latestHistoryItem();
 
-  if (lastSearch) {
-    addUnique(actions, {
-      type: 'org.sefaria.quick.last-search',
-      title: 'Last Search',
-      subtitle: lastSearch,
-      url: searchToAppURL(lastSearch),
-      icon: 'search',
-    });
-  }
+  const continueRef = latest?.ref || snapshot.currentRef || '';
+  const continueTitle = latest
+    ? displayRefForHistoryItem(latest, snapshot.interfaceLanguage)
+    : snapshot.currentRef;
 
-  historyItems().slice(0, 3).forEach((item, index) => {
+  if (continueRef) {
     addUnique(actions, {
-      type: `org.sefaria.quick.recent-${index + 1}`,
-      title: item.ref,
-      subtitle: index === 0 ? 'Continue Reading' : 'Recent Source',
-      url: refToAppURL(item.ref),
-      icon: index === 0 ? 'play' : 'history',
-    });
-  });
-
-  if (actions.length < MAX_QUICK_ACTIONS && snapshot.currentRef) {
-    addUnique(actions, {
-      type: 'org.sefaria.quick.current-ref',
-      title: 'Continue Reading',
-      subtitle: snapshot.currentRef,
-      url: refToAppURL(snapshot.currentRef),
+      type: 'org.sefaria.quick.continue',
+      title: labels.continueReading,
+      subtitle: continueTitle,
+      url: refToAppURL(continueRef),
       icon: 'play',
     });
   }
 
-  if (actions.length < MAX_QUICK_ACTIONS && !lastSearch) {
+  if (lastSearch) {
+    addUnique(actions, {
+      type: 'org.sefaria.quick.last-search',
+      title: labels.lastSearch,
+      subtitle: lastSearch,
+      url: searchToAppURL(lastSearch),
+      icon: 'search',
+    });
+  } else {
     addUnique(actions, {
       type: 'org.sefaria.quick.search',
-      title: 'Search',
-      subtitle: 'Search Sefaria texts',
+      title: labels.search,
+      subtitle: labels.searchSubtitle,
       url: searchToAppURL(''),
       icon: 'search',
     });
   }
 
-  if (actions.length < MAX_QUICK_ACTIONS) {
-    addUnique(actions, {
-      type: 'org.sefaria.quick.open-ref',
-      title: 'Open Ref',
-      subtitle: 'Lookup a source',
-      url: quickURL('open-ref'),
-      icon: 'bookmark',
-    });
-  }
+  addUnique(actions, {
+    type: 'org.sefaria.quick.open-ref',
+    title: labels.openRef,
+    subtitle: labels.openRefSubtitle,
+    url: quickURL('open-ref'),
+    icon: 'bookmark',
+  });
 
-  if (actions.length < MAX_QUICK_ACTIONS) {
-    addUnique(actions, {
-      type: 'org.sefaria.quick.random',
-      title: 'Random Source',
-      subtitle: 'Open a random book',
-      url: quickURL('random'),
-      icon: 'shuffle',
-    });
-  }
-
-  if (actions.length < MAX_QUICK_ACTIONS) {
-    addUnique(actions, {
-      type: 'org.sefaria.quick.settings',
-      title: 'Settings',
-      subtitle: 'Open app settings',
-      url: quickURL('settings'),
-      icon: 'settings',
-    });
-  }
+  addUnique(actions, {
+    type: 'org.sefaria.quick.recent',
+    title: labels.recentSources,
+    subtitle: labels.recentSourcesSubtitle,
+    url: `${APP_URL_BASE}texts/history`,
+    icon: 'history',
+  });
 
   return actions.slice(0, MAX_QUICK_ACTIONS);
 };

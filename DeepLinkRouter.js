@@ -13,6 +13,7 @@ class DeepLinkRouter extends React.PureComponent {
     openUri:                 PropTypes.func.isRequired,
     openTextTocDirectly:     PropTypes.func.isRequired,
     openSearch:              PropTypes.func.isRequired,
+    openAutocomplete:        PropTypes.func,
     openTopic:               PropTypes.func.isRequired,
     setSearchOptions:        PropTypes.func.isRequired,
     setTextLanguage:         PropTypes.func.isRequired,
@@ -27,7 +28,7 @@ class DeepLinkRouter extends React.PureComponent {
       ['^texts/(history)$', this.openMenu, ['menu']],
       ['^texts/(.+)?$', this.openCats, ['cats']],
       ['^search$', this.openSearch],
-      ['^__quick/(settings|open-ref|random)$', this.openQuickAction, ['action']],
+      ['^__quick/(settings|open-ref|random|recent)$', this.openQuickAction, ['action']],
       ['^topics/(category)/(.+)$', this.openTopic, ['categoryString','slug']],
       ['^topics/(.+)$', {fromOutside: this.catchAll, fromInside: this.openTopic}, ['slug']],
       ['^([^/]+)$', this.openRef, ['tref']],
@@ -57,9 +58,16 @@ class DeepLinkRouter extends React.PureComponent {
         this.props.openMenu('settings', 'quick-action');
         return;
       case 'open-ref':
-        this.props.setSearchOptions('text', 'relevance', false, () => {
-          this.props.openSearch('text', '');
-        });
+        if (this.props.openAutocomplete) {
+          this.props.openAutocomplete();
+        } else {
+          this.props.setSearchOptions('text', 'relevance', false, () => {
+            this.props.openSearch('text', '');
+          });
+        }
+        return;
+      case 'recent':
+        this.props.openMenu('history', 'quick-action');
         return;
       case 'random': {
         const titles = this._flattenTocTitles(Sefaria.toc || []);
