@@ -174,15 +174,18 @@ const buildQuickActions = snapshot => {
     icon: 'bookmark',
   });
 
-  recentItems.slice(0, 3).forEach((item, index) => {
-    addUnique(actions, {
-      type: RECENT_QUICK_ACTION_TYPES[index],
-      title: labels.recentSourceNumbered(index + 1),
-      subtitle: displayRefForHistoryItem(item, snapshot.interfaceLanguage),
-      url: refToAppURL(item.ref),
-      icon: 'history',
+  recentItems
+    .filter(item => item?.ref && item.ref !== continueRef)
+    .slice(0, 3)
+    .forEach((item, index) => {
+      addUnique(actions, {
+        type: RECENT_QUICK_ACTION_TYPES[index],
+        title: labels.recentSourceNumbered(index + 1),
+        subtitle: displayRefForHistoryItem(item, snapshot.interfaceLanguage),
+        url: refToAppURL(item.ref),
+        icon: 'history',
+      });
     });
-  });
 
   addUnique(actions, {
     type: 'org.sefaria.quick.settings',
