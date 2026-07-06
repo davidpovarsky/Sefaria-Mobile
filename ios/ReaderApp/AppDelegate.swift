@@ -82,7 +82,7 @@ class AppDelegate: ExpoAppDelegate {
   private func buildSefariaMenu(from dictionary: [String: Any]) -> UIMenu? {
     guard let title = dictionary["title"] as? String, !title.isEmpty else { return nil }
     let id = dictionary["id"] as? String ?? title
-    let children = (dictionary["children"] as? [[String: Any]] ?? []).compactMap { buildSefariaMenuElement(from: $0) }
+    let children = buildSefariaMenuChildren(from: dictionary)
     guard !children.isEmpty else { return nil }
     return UIMenu(
       title: title,
@@ -93,10 +93,45 @@ class AppDelegate: ExpoAppDelegate {
     )
   }
 
+  private func buildSefariaMenuChildren(from dictionary: [String: Any]) -> [UIMenuElement] {
+    if let groups = dictionary["groups"] as? [Any] {
+      return groups.enumerated().compactMap { index, groupObject in
+        let items = groupObject as? [[String: Any]] ?? []
+        let children = items.compactMap { buildSefariaMenuElement(from: $0) }
+        guard !children.isEmpty else { return nil }
+        return UIMenu(
+          title: "",
+          image: nil,
+          identifier: UIMenu.Identifier("org.sefaria.menu.group.\(dictionary["id"] as? String ?? "menu").\(index)"),
+          options: .displayInline,
+          children: children
+        ) as UIMenuElement
+      }
+    }
+
+    return (dictionary["children"] as? [[String: Any]] ?? []).compactMap { buildSefariaMenuElement(from: $0) }
+  }
+
   private func buildSefariaMenuElement(from dictionary: [String: Any]) -> UIMenuElement? {
     guard let title = dictionary["title"] as? String, !title.isEmpty else { return nil }
     let id = dictionary["id"] as? String ?? title
-    if let childDictionaries = dictionary["children"] as? [[String: Any]], !childDictionaries.isEmpty {
+    let itemType = dictionary["type"] as? String
+
+    if itemType == "group" {
+      let childDictionaries = dictionary["children"] as? [[String: Any]] ?? []
+      let children = childDictionaries.compactMap { buildSefariaMenuElement(from: $0) }
+      guard !children.isEmpty else { return nil }
+      return UIMenu(
+        title: "",
+        image: nil,
+        identifier: UIMenu.Identifier("org.sefaria.menu.group.\(id)"),
+        options: .displayInline,
+        children: children
+      )
+    }
+
+    if itemType == "menu" || ((dictionary["children"] as? [[String: Any]])?.isEmpty == false) {
+      let childDictionaries = dictionary["children"] as? [[String: Any]] ?? []
       let children = childDictionaries.compactMap { buildSefariaMenuElement(from: $0) }
       guard !children.isEmpty else { return nil }
       return UIMenu(
@@ -121,10 +156,11 @@ class AppDelegate: ExpoAppDelegate {
   }
 
   private func performSefariaMenuCommand(_ command: [String: Any]) {
+    let type = command["type"] as? String
     let action = command["action"] as? String
     let urlString = command["url"] as? String ?? ""
 
-    if action == "copy" {
+    if type == "copy" || action == "copy" {
       let text = command["text"] as? String ?? urlString
       if !text.isEmpty {
         UIPasteboard.general.string = text

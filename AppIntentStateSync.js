@@ -30,6 +30,14 @@ const refToAppURL = ref => {
   return normalized ? `${APP_URL_BASE}${encodeURIComponent(normalized)}` : APP_URL_BASE;
 };
 
+const categoryToAppURL = categories => {
+  const path = (categories || [])
+    .filter(category => String(category || '').trim())
+    .map(category => encodeURIComponent(String(category).trim()))
+    .join('/');
+  return path ? `${APP_URL_BASE}texts/${path}` : `${APP_URL_BASE}texts`;
+};
+
 const searchToAppURL = query => {
   const q = encodeURIComponent(String(query || '').trim());
   return q ? `${APP_URL_BASE}search?q=${q}` : `${APP_URL_BASE}search`;
@@ -210,6 +218,77 @@ const addMenuItem = (items, item) => {
   items.push(item);
 };
 
+const menuAction = ({ id, title, url, action, text }) => ({
+  type: action === 'copy' ? 'copy' : 'url',
+  id,
+  title,
+  ...(url ? { url } : {}),
+  ...(text ? { text } : {}),
+  ...(action && action !== 'copy' ? { action } : {}),
+});
+
+const displayTocTitle = (item, interfaceLanguage) => {
+  if (isHebrewInterface(interfaceLanguage)) {
+    return item.heCategory || item.heTitle || item.category || item.title || '';
+  }
+  return item.category || item.title || '';
+};
+
+const stableMenuId = value => String(value || '')
+  .trim()
+  .replace(/[^a-zA-Z0-9_-]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .toLowerCase();
+
+const buildSourceTreeMenuItems = (items, categories, interfaceLanguage, depth = 0, seen = new Set()) => {
+  if (!Array.isArray(items) || depth > 12) { return []; }
+  return items
+    .filter(item => item && !item.hidden)
+    .map(item => {
+      if (item.category) {
+        const nextCategories = categories.concat(item.category);
+        const idPath = nextCategories.join('/');
+        if (seen.has(idPath)) { return null; }
+        const nextSeen = new Set(seen);
+        nextSeen.add(idPath);
+        const title = displayTocTitle(item, interfaceLanguage);
+        if (!title) { return null; }
+        const children = buildSourceTreeMenuItems(item.contents || [], nextCategories, interfaceLanguage, depth + 1, nextSeen);
+        return {
+          type: 'menu',
+          id: `source-category-${stableMenuId(idPath)}`,
+          title,
+          url: categoryToAppURL(nextCategories),
+          children: [
+            menuAction({
+              id: `open-source-category-${stableMenuId(idPath)}`,
+              title,
+              url: categoryToAppURL(nextCategories),
+            }),
+            ...children,
+          ],
+        };
+      }
+      const title = displayTocTitle(item, interfaceLanguage);
+      const routeTitle = item.title;
+      if (!title || !routeTitle) { return null; }
+      return menuAction({
+        id: `source-book-${stableMenuId(routeTitle)}`,
+        title,
+        url: refToAppURL(routeTitle),
+      });
+    })
+    .filter(Boolean);
+};
+
+const sourceTreeItems = interfaceLanguage => {
+  try {
+    return buildSourceTreeMenuItems(Sefaria.getRootTocItems ? Sefaria.getRootTocItems() : Sefaria.toc, [], interfaceLanguage);
+  } catch (e) {
+    return [];
+  }
+};
+
 const buildMenuSections = snapshot => {
   const labels = menuLabelsFor(snapshot.interfaceLanguage);
   const recentItems = historyItems();
@@ -221,7 +300,7 @@ const buildMenuSections = snapshot => {
   const recentSources = recentItems
     .filter(item => item?.ref && item.ref !== continueRef)
     .slice(0, MAX_RECENT_MENU_ITEMS)
-    .map((item, index) => ({
+    .map((item, index) => menuAction({
       id: `recent-source-${index + 1}`,
       title: displayRefForHistoryItem(item, snapshot.interfaceLanguage),
       url: refToAppURL(item.ref),
@@ -229,66 +308,62 @@ const buildMenuSections = snapshot => {
   const recentSearches = (snapshot.recentQueries || recentQueryItems())
     .filter(item => item && String(item.query || '').trim())
     .slice(0, MAX_RECENT_MENU_ITEMS)
-    .map((item, index) => ({
+    .map((item, index) => menuAction({
       id: `recent-search-${index + 1}`,
       title: String(item.query || '').trim(),
       url: searchToAppURL(item.query),
     }));
 
-  const sources = [];
-  addMenuItem(sources, { id: 'open-ref', title: labels.openSource, url: quickURL('open-ref') });
-  addMenuItem(sources, { id: 'index-search', title: labels.searchIndex, url: quickURL('index-search') });
-  addMenuItem(sources, { id: 'all-texts', title: labels.allTexts, url: `${APP_URL_BASE}texts` });
-  addMenuItem(sources, { id: 'random', title: labels.randomSource, url: quickURL('random') });
+  const sourceActions = [];
+  addMenuItem(sourceActions, menuAction({ id: 'open-ref', title: labels.openSource, url: quickURL('open-ref') }));
+  addMenuItem(sourceActions, menuAction({ id: 'index-search', title: labels.searchIndex, url: quickURL('index-search') }));
+  addMenuItem(sourceActions, menuAction({ id: 'all-texts', title: labels.allTexts, url: `${APP_URL_BASE}texts` }));
+  addMenuItem(sourceActions, menuAction({ id: 'random', title: labels.randomSource, url: quickURL('random') }));
 
   const reading = [];
-  addMenuItem(reading, { id: 'continue-reading', title: labels.continueReading, url: continueRef ? refToAppURL(continueRef) : quickURL('recent') });
-  addMenuItem(reading, { id: 'current-source', title: labels.currentSource, url: currentSourceUrl });
+  addMenuItem(reading, menuAction({ id: 'continue-reading', title: labels.continueReading, url: continueRef ? refToAppURL(continueRef) : quickURL('recent') }));
+  addMenuItem(reading, menuAction({ id: 'current-source', title: labels.currentSource, url: currentSourceUrl }));
   if (currentWebUrl) {
-    addMenuItem(reading, { id: 'copy-current-source-link', title: labels.copyCurrentSourceLink, action: 'copy', text: currentWebUrl });
-    addMenuItem(reading, { id: 'open-current-source-site', title: labels.openCurrentSourceOnSite, action: 'openExternal', url: currentWebUrl });
+    addMenuItem(reading, menuAction({ id: 'copy-current-source-link', title: labels.copyCurrentSourceLink, action: 'copy', text: currentWebUrl }));
+    addMenuItem(reading, menuAction({ id: 'open-current-source-site', title: labels.openCurrentSourceOnSite, action: 'openExternal', url: currentWebUrl }));
   }
 
   const search = [];
-  addMenuItem(search, { id: 'search-texts', title: labels.searchTexts, url: searchToAppURL('') });
-  addMenuItem(search, { id: 'last-search', title: labels.lastSearch, url: searchToAppURL(snapshot.searchQuery || '') });
-  if (recentSearches.length) {
-    addMenuItem(search, { id: 'recent-searches', title: labels.recentSearches, children: recentSearches });
+  addMenuItem(search, menuAction({ id: 'search-texts', title: labels.searchTexts, url: searchToAppURL('') }));
+  if (String(snapshot.searchQuery || '').trim()) {
+    addMenuItem(search, menuAction({ id: 'last-search', title: labels.lastSearch, url: searchToAppURL(snapshot.searchQuery) }));
   }
 
   const history = [];
-  addMenuItem(history, { id: 'history', title: labels.history, url: `${APP_URL_BASE}texts/history` });
-  addMenuItem(history, { id: 'saved', title: labels.saved, url: `${APP_URL_BASE}texts/saved` });
-  if (recentSources.length) {
-    addMenuItem(history, { id: 'recent-sources', title: labels.recentSources, children: recentSources });
-  }
+  addMenuItem(history, menuAction({ id: 'history', title: labels.history, url: `${APP_URL_BASE}texts/history` }));
+  addMenuItem(history, menuAction({ id: 'saved', title: labels.saved, url: `${APP_URL_BASE}texts/saved` }));
 
   return [
-    { id: 'sources', title: labels.sourcesMenu, children: sources },
-    { id: 'reading', title: labels.readingMenu, children: reading },
-    { id: 'search', title: labels.searchMenu, children: search },
-    { id: 'history', title: labels.historyMenu, children: history },
+    { id: 'sources', title: labels.sourcesMenu, groups: [sourceActions, sourceTreeItems(snapshot.interfaceLanguage)] },
+    { id: 'reading', title: labels.readingMenu, groups: [reading] },
+    { id: 'search', title: labels.searchMenu, groups: [search, recentSearches] },
+    { id: 'history', title: labels.historyMenu, groups: [history, recentSources] },
     {
       id: 'view',
       title: labels.viewMenu,
-      children: [
-        { id: 'text-language-hebrew', title: labels.hebrew, url: quickURL('text-language-hebrew') },
-        { id: 'text-language-english', title: labels.english, url: quickURL('text-language-english') },
-        { id: 'text-language-bilingual', title: labels.bilingual, url: quickURL('text-language-bilingual') },
-        { id: 'increase-text-size', title: labels.increaseTextSize, url: quickURL('increase-text-size') },
-        { id: 'decrease-text-size', title: labels.decreaseTextSize, url: quickURL('decrease-text-size') },
-        { id: 'toggle-vocalization', title: labels.toggleVocalization, url: quickURL('toggle-vocalization') },
-      ],
+      groups: [[
+        menuAction({ id: 'text-language-hebrew', title: labels.hebrew, url: quickURL('text-language-hebrew') }),
+        menuAction({ id: 'text-language-english', title: labels.english, url: quickURL('text-language-english') }),
+        menuAction({ id: 'text-language-bilingual', title: labels.bilingual, url: quickURL('text-language-bilingual') }),
+        menuAction({ id: 'increase-text-size', title: labels.increaseTextSize, url: quickURL('increase-text-size') }),
+        menuAction({ id: 'decrease-text-size', title: labels.decreaseTextSize, url: quickURL('decrease-text-size') }),
+        menuAction({ id: 'toggle-vocalization', title: labels.toggleVocalization, url: quickURL('toggle-vocalization') }),
+      ]],
     },
     {
       id: 'tools',
       title: labels.toolsMenu,
-      children: [
-        { id: 'settings', title: labels.settings, url: quickURL('settings') },
-        { id: 'spotlight-index', title: labels.spotlightIndex, url: quickURL('spotlight-index') },
-        { id: 'rebuild-spotlight-index', title: labels.rebuildSpotlightIndex, url: quickURL('spotlight-index') },
-        { id: 'current-app-state', title: labels.currentAppState, url: quickURL('current-app-state') },
-      ],
+      groups: [[
+        menuAction({ id: 'settings', title: labels.settings, url: quickURL('settings') }),
+        menuAction({ id: 'spotlight-index', title: labels.spotlightIndex, url: quickURL('spotlight-index') }),
+        menuAction({ id: 'rebuild-spotlight-index', title: labels.rebuildSpotlightIndex, url: quickURL('spotlight-index') }),
+        menuAction({ id: 'current-app-state', title: labels.currentAppState, url: quickURL('current-app-state') }),
+      ]],
     },
   ];
 };
