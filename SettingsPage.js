@@ -46,6 +46,7 @@ import {
 import Sefaria from "./sefaria";
 import * as FileSystem from 'expo-file-system/legacy';
 import { trackEvent } from './analytics/events';
+import SpotlightSettingsPanel from './SpotlightSettingsPanel';
 const DEBUG_MODE = false;
 
 /**
@@ -328,6 +329,7 @@ const SettingsPage = ({ close, logout, openUri, syncProfile }) => {
           <SystemButton onPress={onLogOut} text={strings.logout} isHeb={interfaceLanguage === "hebrew"} />
           : null
         }
+        <SpotlightSettingsPanel interfaceLanguage={interfaceLanguage} langStyle={langStyle} theme={theme} />
         <SystemButton onPress={()=>{ openUri('https://www.sefaria.org/terms'); }} text={strings.termsAndPrivacy} isHeb={interfaceLanguage === "hebrew"} />
         <View style={{marginTop: 10}}>
           <Text style={[langStyle, styles.settingsSectionHeader, theme.tertiaryText]}>

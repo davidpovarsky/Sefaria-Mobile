@@ -10,6 +10,7 @@ let pending = false;
 let queuedSnapshot = null;
 
 const MAX_QUICK_ACTIONS = 8;
+const MAX_RECENT_MENU_ITEMS = 6;
 const APP_URL_BASE = 'sefariareader://www.sefaria.org/';
 const RECENT_QUICK_ACTION_TYPES = [
   'org.sefaria.quick.recent-1',
@@ -77,6 +78,73 @@ const displayRefForHistoryItem = (item, interfaceLanguage) => {
   return item.ref || '';
 };
 
+const menuLabelsFor = interfaceLanguage => {
+  const he = isHebrewInterface(interfaceLanguage);
+  return he ? {
+    sourcesMenu: '\u05de\u05e7\u05d5\u05e8\u05d5\u05ea',
+    readingMenu: '\u05e7\u05e8\u05d9\u05d0\u05d4',
+    searchMenu: '\u05d7\u05d9\u05e4\u05d5\u05e9',
+    historyMenu: '\u05d4\u05d9\u05e1\u05d8\u05d5\u05e8\u05d9\u05d4',
+    viewMenu: '\u05ea\u05e6\u05d5\u05d2\u05d4',
+    toolsMenu: '\u05db\u05dc\u05d9\u05dd',
+    openSource: '\u05e4\u05ea\u05d9\u05d7\u05ea \u05de\u05e7\u05d5\u05e8',
+    searchIndex: '\u05d7\u05d9\u05e4\u05d5\u05e9 \u05d1\u05d0\u05d9\u05e0\u05d3\u05e7\u05e1',
+    allTexts: '\u05db\u05dc \u05d4\u05d8\u05e7\u05e1\u05d8\u05d9\u05dd',
+    randomSource: '\u05de\u05e7\u05d5\u05e8 \u05d0\u05e7\u05e8\u05d0\u05d9',
+    continueReading: '\u05d4\u05de\u05e9\u05da \u05e7\u05e8\u05d9\u05d0\u05d4',
+    currentSource: '\u05de\u05e7\u05d5\u05e8 \u05e0\u05d5\u05db\u05d7\u05d9',
+    copyCurrentSourceLink: '\u05d4\u05e2\u05ea\u05e7 \u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e7\u05d5\u05e8',
+    openCurrentSourceOnSite: '\u05e4\u05ea\u05d7 \u05d1\u05d0\u05ea\u05e8',
+    searchTexts: '\u05d7\u05d9\u05e4\u05d5\u05e9 \u05d1\u05d8\u05e7\u05e1\u05d8\u05d9\u05dd',
+    lastSearch: '\u05d7\u05d9\u05e4\u05d5\u05e9 \u05d0\u05d7\u05e8\u05d5\u05df',
+    recentSearches: '\u05d7\u05d9\u05e4\u05d5\u05e9\u05d9\u05dd \u05d0\u05d7\u05e8\u05d5\u05e0\u05d9\u05dd',
+    history: '\u05d4\u05d9\u05e1\u05d8\u05d5\u05e8\u05d9\u05d4',
+    saved: '\u05e9\u05de\u05d5\u05e8\u05d9\u05dd',
+    recentSources: '\u05de\u05e7\u05d5\u05e8\u05d5\u05ea \u05d0\u05d7\u05e8\u05d5\u05e0\u05d9\u05dd',
+    hebrew: '\u05e2\u05d1\u05e8\u05d9\u05ea',
+    english: '\u05d0\u05e0\u05d2\u05dc\u05d9\u05ea',
+    bilingual: '\u05d3\u05d5-\u05dc\u05e9\u05d5\u05e0\u05d9',
+    increaseTextSize: '\u05d4\u05d2\u05d3\u05dc \u05d8\u05e7\u05e1\u05d8',
+    decreaseTextSize: '\u05d4\u05e7\u05d8\u05df \u05d8\u05e7\u05e1\u05d8',
+    toggleVocalization: '\u05e0\u05d9\u05e7\u05d5\u05d3',
+    settings: '\u05d4\u05d2\u05d3\u05e8\u05d5\u05ea',
+    spotlightIndex: '\u05d0\u05d9\u05e0\u05d3\u05e7\u05e1 Spotlight',
+    rebuildSpotlightIndex: '\u05d1\u05e0\u05d9\u05d9\u05ea \u05d0\u05d9\u05e0\u05d3\u05e7\u05e1 \u05de\u05d7\u05d3\u05e9',
+    currentAppState: '\u05de\u05e6\u05d1 \u05e0\u05d5\u05db\u05d7\u05d9',
+  } : {
+    sourcesMenu: 'Sources',
+    readingMenu: 'Reading',
+    searchMenu: 'Search',
+    historyMenu: 'History',
+    viewMenu: 'View',
+    toolsMenu: 'Tools',
+    openSource: 'Open Source',
+    searchIndex: 'Search Index',
+    allTexts: 'All Texts',
+    randomSource: 'Random Source',
+    continueReading: 'Continue Reading',
+    currentSource: 'Current Source',
+    copyCurrentSourceLink: 'Copy Current Source Link',
+    openCurrentSourceOnSite: 'Open Current Source on Sefaria.org',
+    searchTexts: 'Search Texts',
+    lastSearch: 'Last Search',
+    recentSearches: 'Recent Searches',
+    history: 'History',
+    saved: 'Saved',
+    recentSources: 'Recent Sources',
+    hebrew: 'Hebrew',
+    english: 'English',
+    bilingual: 'Bilingual',
+    increaseTextSize: 'Increase Text Size',
+    decreaseTextSize: 'Decrease Text Size',
+    toggleVocalization: 'Toggle Vocalization',
+    settings: 'Settings',
+    spotlightIndex: 'Spotlight Index',
+    rebuildSpotlightIndex: 'Rebuild Spotlight Index',
+    currentAppState: 'Current App State',
+  };
+};
+
 const makeSnapshot = (state, props) => {
   const isSearchOpen = state.menuOpen === 'search';
   const isHistoryOpen = state.menuOpen === 'menu' || state.menuOpen === 'history';
@@ -107,6 +175,7 @@ const makeSnapshot = (state, props) => {
     sheetId: safe(state.sheet?.id),
     textLanguage: safe(props.textLanguage),
     interfaceLanguage: safe(props.interfaceLanguage),
+    recentQueries: recentQueryItems(),
     updatedAt: Date.now(),
   };
 };
@@ -115,7 +184,17 @@ const historyItems = () => {
   try {
     return (Sefaria.history?.lastPlace || [])
       .filter(item => item && item.ref)
-      .slice(0, 6);
+      .slice(0, MAX_RECENT_MENU_ITEMS + 1);
+  } catch (e) {
+    return [];
+  }
+};
+
+const recentQueryItems = () => {
+  try {
+    return (Sefaria.recentQueries || [])
+      .filter(item => item && String(item.query || '').trim())
+      .slice(0, MAX_RECENT_MENU_ITEMS);
   } catch (e) {
     return [];
   }
@@ -124,6 +203,94 @@ const historyItems = () => {
 const addUnique = (items, item) => {
   if (!item || !item.url || items.find(existing => existing.type === item.type)) { return; }
   items.push(item);
+};
+
+const addMenuItem = (items, item) => {
+  if (!item || !item.title) { return; }
+  items.push(item);
+};
+
+const buildMenuSections = snapshot => {
+  const labels = menuLabelsFor(snapshot.interfaceLanguage);
+  const recentItems = historyItems();
+  const latest = recentItems[0];
+  const continueRef = latest?.ref || snapshot.currentRef || '';
+  const currentRef = snapshot.currentRef || continueRef;
+  const currentSourceUrl = currentRef ? refToAppURL(currentRef) : quickURL('open-ref');
+  const currentWebUrl = String(snapshot.currentUrl || '').trim();
+  const recentSources = recentItems
+    .filter(item => item?.ref && item.ref !== continueRef)
+    .slice(0, MAX_RECENT_MENU_ITEMS)
+    .map((item, index) => ({
+      id: `recent-source-${index + 1}`,
+      title: displayRefForHistoryItem(item, snapshot.interfaceLanguage),
+      url: refToAppURL(item.ref),
+    }));
+  const recentSearches = (snapshot.recentQueries || recentQueryItems())
+    .filter(item => item && String(item.query || '').trim())
+    .slice(0, MAX_RECENT_MENU_ITEMS)
+    .map((item, index) => ({
+      id: `recent-search-${index + 1}`,
+      title: String(item.query || '').trim(),
+      url: searchToAppURL(item.query),
+    }));
+
+  const sources = [];
+  addMenuItem(sources, { id: 'open-ref', title: labels.openSource, url: quickURL('open-ref') });
+  addMenuItem(sources, { id: 'index-search', title: labels.searchIndex, url: quickURL('index-search') });
+  addMenuItem(sources, { id: 'all-texts', title: labels.allTexts, url: `${APP_URL_BASE}texts` });
+  addMenuItem(sources, { id: 'random', title: labels.randomSource, url: quickURL('random') });
+
+  const reading = [];
+  addMenuItem(reading, { id: 'continue-reading', title: labels.continueReading, url: continueRef ? refToAppURL(continueRef) : quickURL('recent') });
+  addMenuItem(reading, { id: 'current-source', title: labels.currentSource, url: currentSourceUrl });
+  if (currentWebUrl) {
+    addMenuItem(reading, { id: 'copy-current-source-link', title: labels.copyCurrentSourceLink, action: 'copy', text: currentWebUrl });
+    addMenuItem(reading, { id: 'open-current-source-site', title: labels.openCurrentSourceOnSite, action: 'openExternal', url: currentWebUrl });
+  }
+
+  const search = [];
+  addMenuItem(search, { id: 'search-texts', title: labels.searchTexts, url: searchToAppURL('') });
+  addMenuItem(search, { id: 'last-search', title: labels.lastSearch, url: searchToAppURL(snapshot.searchQuery || '') });
+  if (recentSearches.length) {
+    addMenuItem(search, { id: 'recent-searches', title: labels.recentSearches, children: recentSearches });
+  }
+
+  const history = [];
+  addMenuItem(history, { id: 'history', title: labels.history, url: `${APP_URL_BASE}texts/history` });
+  addMenuItem(history, { id: 'saved', title: labels.saved, url: `${APP_URL_BASE}texts/saved` });
+  if (recentSources.length) {
+    addMenuItem(history, { id: 'recent-sources', title: labels.recentSources, children: recentSources });
+  }
+
+  return [
+    { id: 'sources', title: labels.sourcesMenu, children: sources },
+    { id: 'reading', title: labels.readingMenu, children: reading },
+    { id: 'search', title: labels.searchMenu, children: search },
+    { id: 'history', title: labels.historyMenu, children: history },
+    {
+      id: 'view',
+      title: labels.viewMenu,
+      children: [
+        { id: 'text-language-hebrew', title: labels.hebrew, url: quickURL('text-language-hebrew') },
+        { id: 'text-language-english', title: labels.english, url: quickURL('text-language-english') },
+        { id: 'text-language-bilingual', title: labels.bilingual, url: quickURL('text-language-bilingual') },
+        { id: 'increase-text-size', title: labels.increaseTextSize, url: quickURL('increase-text-size') },
+        { id: 'decrease-text-size', title: labels.decreaseTextSize, url: quickURL('decrease-text-size') },
+        { id: 'toggle-vocalization', title: labels.toggleVocalization, url: quickURL('toggle-vocalization') },
+      ],
+    },
+    {
+      id: 'tools',
+      title: labels.toolsMenu,
+      children: [
+        { id: 'settings', title: labels.settings, url: quickURL('settings') },
+        { id: 'spotlight-index', title: labels.spotlightIndex, url: quickURL('spotlight-index') },
+        { id: 'rebuild-spotlight-index', title: labels.rebuildSpotlightIndex, url: quickURL('spotlight-index') },
+        { id: 'current-app-state', title: labels.currentAppState, url: quickURL('current-app-state') },
+      ],
+    },
+  ];
 };
 
 const buildQuickActions = snapshot => {
@@ -201,12 +368,16 @@ const buildQuickActions = snapshot => {
 const sendSnapshot = async snapshot => {
   if (Platform.OS !== 'ios' || !SpotlightNative?.updateAppState) { return; }
   const quickActions = buildQuickActions(snapshot);
-  const signature = JSON.stringify({ snapshot, quickActions });
+  const menuSections = buildMenuSections(snapshot);
+  const signature = JSON.stringify({ snapshot, quickActions, menuSections });
   if (signature === lastSignature) { return; }
   lastSignature = signature;
   await SpotlightNative.updateAppState(snapshot);
   if (SpotlightNative.updateQuickActions) {
     await SpotlightNative.updateQuickActions(quickActions);
+  }
+  if (SpotlightNative.updateMenuCommands) {
+    await SpotlightNative.updateMenuCommands(menuSections);
   }
 };
 

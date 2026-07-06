@@ -6,6 +6,7 @@
 static NSString * const SefariaSpotlightDomain = @"org.sefaria.reader.sources";
 static NSString * const SefariaIntentSourcesKey = @"SefariaIntentSourcesV1";
 static NSString * const SefariaIntentStateKey = @"SefariaIntentCurrentStateV1";
+static NSString * const SefariaMenuCommandsKey = @"SefariaMenuCommandsV1";
 
 @interface SpotlightIndexer : NSObject <RCTBridgeModule>
 @end
@@ -114,6 +115,35 @@ RCT_REMAP_METHOD(updateQuickActions,
     [UIApplication sharedApplication].shortcutItems = shortcutItems;
     NSLog(@"[SefariaQuickActions] Attempted %lu, updated %lu dynamic Home Screen quick actions", (unsigned long)attemptedCount, (unsigned long)shortcutItems.count);
     resolve(@{@"updated": @YES, @"attempted": @(attemptedCount), @"count": @(shortcutItems.count)});
+  });
+}
+
+RCT_REMAP_METHOD(updateMenuCommands,
+                 updateMenuCommands:(NSArray *)menuSections
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
+{
+  if (![menuSections isKindOfClass:[NSArray class]]) {
+    resolve(@{@"updated": @NO, @"count": @0});
+    return;
+  }
+
+  NSError *error = nil;
+  NSData *data = [NSJSONSerialization dataWithJSONObject:menuSections options:0 error:&error];
+  if (error || !data) {
+    reject(@"menu_commands_encode_error", error.localizedDescription, error);
+    return;
+  }
+
+  [[NSUserDefaults standardUserDefaults] setObject:data forKey:SefariaMenuCommandsKey];
+  [[NSUserDefaults standardUserDefaults] synchronize];
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (@available(iOS 14.0, *)) {
+      [[UIMenuSystem mainSystem] setNeedsRebuild];
+    }
+    NSLog(@"[SefariaMenuCommands] Saved %lu top-level iPad menu sections", (unsigned long)menuSections.count);
+    resolve(@{@"updated": @YES, @"count": @(menuSections.count)});
   });
 }
 

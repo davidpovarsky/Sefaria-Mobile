@@ -50,6 +50,7 @@ import Toast from 'react-native-root-toast';
 import { TabHistory, TabMetadata } from './PageHistory';
 import SheetMeta from "./SheetMeta.js";
 import DeepLinkRouter from "./DeepLinkRouter.js";
+import AppIntentStateSync from './AppIntentStateSync';
 import { AuthPage } from "./AuthPage";
 import { TopicCategory, TopicPage } from "./TopicPage";
 import {HistorySavedPage} from "./HistorySavedPage";
@@ -193,6 +194,7 @@ class ReaderApp extends React.PureComponent {
         }
       });
     }
+    this.syncAppIntentState();
   }
 
   logout = async () => {
@@ -418,13 +420,31 @@ class ReaderApp extends React.PureComponent {
         this.state.textFlow          !== prevState.textFlow          ||
         this.props.textLanguage      !== prevProps.textLanguage      || // note this var is coming from props
         this.state.textListVisible   !== prevState.textListVisible   ||
+        this.state.textReference     !== prevState.textReference     ||
         this.state.segmentIndexRef   !== prevState.segmentIndexRef   ||
         this.state.segmentRef        !== prevState.segmentRef        ||
+        this.state.searchQuery       !== prevState.searchQuery       ||
         this.state.linkRecentFilters !== prevState.linkRecentFilters ||
+        this.props.interfaceLanguage !== prevProps.interfaceLanguage ||
         this.props.themeStr          !== prevProps.themeStr) {
           this.trackPageWithInfo();
+          this.syncAppIntentState();
     }
   }
+
+  syncAppIntentState = () => {
+    AppIntentStateSync.updateFromReaderApp(this.state, this.props);
+  };
+
+  getCurrentSourceUrl = () => {
+    const currentRef = this.state.segmentRef || this.state.textReference || '';
+    if (!currentRef) { return 'https://www.sefaria.org'; }
+    try {
+      return Sefaria.refToFullUrl(currentRef);
+    } catch (e) {
+      return `https://www.sefaria.org/${encodeURIComponent(currentRef.replace(/ /g, '_'))}`;
+    }
+  };
 
   showToast = (text, duration, onHidden) => {
     Toast.show(text, {duration, onHidden});
@@ -2325,7 +2345,11 @@ class ReaderApp extends React.PureComponent {
             setSearchOptions={this.setSearchOptions}
             openTextTocDirectly={this.openTextTocDirectly}
             setTextLanguage={this.setTextLanguage}
+            incrementFont={this.incrementFont}
+            setVocalization={this.setVocalization}
+            vocalization={this.props.vocalization}
             setNavigationCategories={this.setNavigationCategories}
+            getCurrentSourceUrl={this.getCurrentSourceUrl}
           />
         </View>
       </ReaderAppContext.Provider>

@@ -3,7 +3,9 @@
 import PropTypes from 'prop-types';
 import URL from 'url-parse';
 import React from 'react';
+import Clipboard from '@react-native-clipboard/clipboard';
 import Sefaria from './sefaria';
+import { VOCALIZATION } from './VocalizationEnum';
 
 class DeepLinkRouter extends React.PureComponent {
   static propTypes = {
@@ -17,7 +19,11 @@ class DeepLinkRouter extends React.PureComponent {
     openTopic:               PropTypes.func.isRequired,
     setSearchOptions:        PropTypes.func.isRequired,
     setTextLanguage:         PropTypes.func.isRequired,
+    incrementFont:           PropTypes.func,
+    setVocalization:         PropTypes.func,
     setNavigationCategories: PropTypes.func.isRequired,
+    getCurrentSourceUrl:     PropTypes.func,
+    vocalization:            PropTypes.number,
   };
   constructor(props) {
     super(props);
@@ -28,7 +34,7 @@ class DeepLinkRouter extends React.PureComponent {
       ['^texts/(history)$', this.openMenu, ['menu']],
       ['^texts/(.+)?$', this.openCats, ['cats']],
       ['^search$', this.openSearch],
-      ['^__quick/(settings|open-ref|random|recent)$', this.openQuickAction, ['action']],
+      ['^__quick/(settings|open-ref|random|recent|index-search|spotlight-index|copy-current-link|open-current-site|text-language-hebrew|text-language-english|text-language-bilingual|increase-text-size|decrease-text-size|toggle-vocalization|current-app-state)$', this.openQuickAction, ['action']],
       ['^topics/(category)/(.+)$', this.openTopic, ['categoryString','slug']],
       ['^topics/(.+)$', {fromOutside: this.catchAll, fromInside: this.openTopic}, ['slug']],
       ['^([^/]+)$', this.openRef, ['tref']],
@@ -60,8 +66,43 @@ class DeepLinkRouter extends React.PureComponent {
       case 'open-ref':
         this.props.openNav();
         return;
+      case 'index-search':
+        if (this.props.openAutocomplete) {
+          this.props.openAutocomplete();
+        } else {
+          this.props.openSearch('text', '');
+        }
+        return;
+      case 'spotlight-index':
+      case 'current-app-state':
+        this.props.openMenu('settings', 'quick-action');
+        return;
       case 'recent':
         this.props.openMenu('history', 'quick-action');
+        return;
+      case 'copy-current-link':
+        Clipboard.setString(this.props.getCurrentSourceUrl?.() || '');
+        return;
+      case 'open-current-site':
+        this.props.openUri(this.props.getCurrentSourceUrl?.() || 'https://www.sefaria.org');
+        return;
+      case 'text-language-hebrew':
+        this.props.setTextLanguage('hebrew');
+        return;
+      case 'text-language-english':
+        this.props.setTextLanguage('english');
+        return;
+      case 'text-language-bilingual':
+        this.props.setTextLanguage('bilingual');
+        return;
+      case 'increase-text-size':
+        this.props.incrementFont?.('larger');
+        return;
+      case 'decrease-text-size':
+        this.props.incrementFont?.('smaller');
+        return;
+      case 'toggle-vocalization':
+        this.props.setVocalization?.(this.props.vocalization === VOCALIZATION.NONE ? VOCALIZATION.TAAMIM_AND_NIKKUD : VOCALIZATION.NONE);
         return;
       case 'random': {
         const titles = this._flattenTocTitles(Sefaria.toc || []);

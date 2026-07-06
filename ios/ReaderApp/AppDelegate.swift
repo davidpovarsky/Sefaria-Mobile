@@ -10,6 +10,7 @@ import RNBootSplash
 
 @main
 class AppDelegate: ExpoAppDelegate {
+  private let sefariaMenuCommandsKey = "SefariaMenuCommandsV1"
   var window: UIWindow?
 
   var reactNativeDelegate: ReactNativeDelegate?
@@ -52,6 +53,96 @@ class AppDelegate: ExpoAppDelegate {
     }
     NSLog("[SefariaQuickActions] Quick action had no URL: \(shortcutItem.type)")
     completionHandler(false)
+  }
+
+  override func buildMenu(with builder: UIMenuBuilder) {
+    super.buildMenu(with: builder)
+    guard builder.system == .main else { return }
+
+    let menus = sefariaMenuSections().compactMap { buildSefariaMenu(from: $0) }
+    guard !menus.isEmpty else { return }
+
+    var previousIdentifier = UIMenu.Identifier.application
+    for menu in menus {
+      builder.insertSibling(menu, afterMenu: previousIdentifier)
+      previousIdentifier = menu.identifier
+    }
+  }
+
+  private func sefariaMenuSections() -> [[String: Any]] {
+    guard let data = UserDefaults.standard.data(forKey: sefariaMenuCommandsKey) else { return [] }
+    do {
+      return try JSONSerialization.jsonObject(with: data, options: []) as? [[String: Any]] ?? []
+    } catch {
+      NSLog("[SefariaMenuCommands] Failed to decode menu JSON: \(error.localizedDescription)")
+      return []
+    }
+  }
+
+  private func buildSefariaMenu(from dictionary: [String: Any]) -> UIMenu? {
+    guard let title = dictionary["title"] as? String, !title.isEmpty else { return nil }
+    let id = dictionary["id"] as? String ?? title
+    let children = (dictionary["children"] as? [[String: Any]] ?? []).compactMap { buildSefariaMenuElement(from: $0) }
+    guard !children.isEmpty else { return nil }
+    return UIMenu(
+      title: title,
+      image: nil,
+      identifier: UIMenu.Identifier("org.sefaria.menu.\(id)"),
+      options: [],
+      children: children
+    )
+  }
+
+  private func buildSefariaMenuElement(from dictionary: [String: Any]) -> UIMenuElement? {
+    guard let title = dictionary["title"] as? String, !title.isEmpty else { return nil }
+    let id = dictionary["id"] as? String ?? title
+    if let childDictionaries = dictionary["children"] as? [[String: Any]], !childDictionaries.isEmpty {
+      let children = childDictionaries.compactMap { buildSefariaMenuElement(from: $0) }
+      guard !children.isEmpty else { return nil }
+      return UIMenu(
+        title: title,
+        image: nil,
+        identifier: UIMenu.Identifier("org.sefaria.menu.\(id)"),
+        options: [],
+        children: children
+      )
+    }
+
+    return UIAction(
+      title: title,
+      image: nil,
+      identifier: UIAction.Identifier("org.sefaria.menu.action.\(id)"),
+      discoverabilityTitle: nil,
+      attributes: [],
+      state: .off
+    ) { [weak self] _ in
+      self?.performSefariaMenuCommand(dictionary)
+    }
+  }
+
+  private func performSefariaMenuCommand(_ command: [String: Any]) {
+    let action = command["action"] as? String
+    let urlString = command["url"] as? String ?? ""
+
+    if action == "copy" {
+      let text = command["text"] as? String ?? urlString
+      if !text.isEmpty {
+        UIPasteboard.general.string = text
+      }
+      return
+    }
+
+    guard let url = URL(string: urlString) else { return }
+    if action == "openExternal" {
+      UIApplication.shared.open(url, options: [:], completionHandler: nil)
+      return
+    }
+
+    if url.scheme == "sefariareader" {
+      _ = self.application(UIApplication.shared, open: url, options: [:])
+    } else {
+      UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    }
   }
 
   override func application(
