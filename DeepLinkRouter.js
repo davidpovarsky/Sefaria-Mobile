@@ -58,13 +58,7 @@ class DeepLinkRouter extends React.PureComponent {
         this.props.openMenu('settings', 'quick-action');
         return;
       case 'open-ref':
-        if (this.props.openAutocomplete) {
-          this.props.openAutocomplete();
-        } else {
-          this.props.setSearchOptions('text', 'relevance', false, () => {
-            this.props.openSearch('text', '');
-          });
-        }
+        this.props.openNav();
         return;
       case 'recent':
         this.props.openMenu('history', 'quick-action');
