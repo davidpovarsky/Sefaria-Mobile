@@ -51,6 +51,27 @@
 "param.sort_score_missing" = "ציון חסר במיון";
 "param.source_projection" = "החזרת שדות מקור";
 "param.aggregations" = "קיבוצים";
+"param.search_type" = "סוג חיפוש";
+"param.search_field" = "שדה חיפוש";
+"param.search_aggregation" = "קיבוץ תוצאות";
+"param.advanced_filters" = "סינונים מתקדמים";
+"param.advanced_filter_fields" = "שדות סינון מתקדמים";
+
+"enum.search_type.name" = "סוג חיפוש";
+"enum.search_type.text.title" = "טקסטים";
+"enum.search_type.text.subtitle" = "חיפוש בתוך טקסטים בספריא";
+
+"enum.search_field.name" = "שדה חיפוש";
+"enum.search_field.smart.title" = "חיפוש עברי חכם";
+"enum.search_field.smart.subtitle" = "מתאים לעברית ולצורות מילים קרובות";
+"enum.search_field.exact.title" = "חיפוש מדויק";
+"enum.search_field.exact.subtitle" = "חיפוש לפי המילים המדויקות שהוקלדו";
+
+"enum.search_aggregation.name" = "קיבוץ תוצאות";
+"enum.search_aggregation.path.title" = "לפי מדור";
+"enum.search_aggregation.path.subtitle" = "קיבוץ תוצאות לפי מיקום בספריית ספריא";
+"enum.search_aggregation.none.title" = "ללא קיבוץ";
+"enum.search_aggregation.none.subtitle" = "החזרת תוצאות חיפוש רגילות";
 
 "shortcut.get_current_state.phrase" = "קבל מצב נוכחי ב־${applicationName}";
 "shortcut.get_current_ref.phrase" = "קבל מקור נוכחי ב־${applicationName}";

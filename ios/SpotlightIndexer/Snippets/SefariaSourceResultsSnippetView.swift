@@ -6,7 +6,17 @@ struct SefariaSourceResultsSnippetView: View {
   let title: String
   let sources: [SefariaIntentSource]
 
+  @State private var isExpanded = false
+
   private let maxVisibleResults = 6
+
+  private var visibleSources: [SefariaIntentSource] {
+    if isExpanded {
+      return sources
+    }
+
+    return Array(sources.prefix(maxVisibleResults))
+  }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
@@ -23,19 +33,23 @@ struct SefariaSourceResultsSnippetView: View {
           .foregroundStyle(.secondary)
       } else {
         VStack(alignment: .leading, spacing: 10) {
-          ForEach(Array(sources.prefix(maxVisibleResults).enumerated()), id: \.element.id) { index, source in
+          ForEach(Array(visibleSources.enumerated()), id: \.element.id) { index, source in
             SefariaSourceResultRowView(source: source, index: index)
 
-            if index < min(sources.count, maxVisibleResults) - 1 {
+            if index < visibleSources.count - 1 {
               Divider()
             }
           }
         }
 
         if sources.count > maxVisibleResults {
-          Text("+ \(sources.count - maxVisibleResults) more")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+          Button {
+            isExpanded.toggle()
+          } label: {
+            Text(isExpanded ? "Show fewer" : "Show \(sources.count - maxVisibleResults) more")
+              .font(.caption)
+          }
+          .buttonStyle(.plain)
         }
       }
     }

@@ -51,6 +51,27 @@
 "param.sort_score_missing" = "Sort Score Missing";
 "param.source_projection" = "Source Projection";
 "param.aggregations" = "Aggregations";
+"param.search_type" = "Search type";
+"param.search_field" = "Search field";
+"param.search_aggregation" = "Group results";
+"param.advanced_filters" = "Advanced filters";
+"param.advanced_filter_fields" = "Advanced filter fields";
+
+"enum.search_type.name" = "Search type";
+"enum.search_type.text.title" = "Texts";
+"enum.search_type.text.subtitle" = "Search inside Sefaria texts";
+
+"enum.search_field.name" = "Search field";
+"enum.search_field.smart.title" = "Smart Hebrew search";
+"enum.search_field.smart.subtitle" = "Best for Hebrew and related word forms";
+"enum.search_field.exact.title" = "Exact text";
+"enum.search_field.exact.subtitle" = "Search for the exact typed words";
+
+"enum.search_aggregation.name" = "Result grouping";
+"enum.search_aggregation.path.title" = "Group by section";
+"enum.search_aggregation.path.subtitle" = "Group results by Sefaria library path";
+"enum.search_aggregation.none.title" = "No grouping";
+"enum.search_aggregation.none.subtitle" = "Return plain search results";
 
 "shortcut.get_current_state.phrase" = "Get current state in ${applicationName}";
 "shortcut.get_current_ref.phrase" = "Get current ref in ${applicationName}";

@@ -5,7 +5,17 @@ struct SefariaSearchResultsSnippetView: View {
   let query: String
   let results: [SefariaSearchResult]
 
+  @State private var isExpanded = false
+
   private let maxVisibleResults = 5
+
+  private var visibleResults: [SefariaSearchResult] {
+    if isExpanded {
+      return results
+    }
+
+    return Array(results.prefix(maxVisibleResults))
+  }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 14) {
@@ -22,19 +32,23 @@ struct SefariaSearchResultsSnippetView: View {
           .foregroundStyle(.secondary)
       } else {
         VStack(alignment: .leading, spacing: 10) {
-          ForEach(Array(results.prefix(maxVisibleResults).enumerated()), id: \.element.id) { index, result in
+          ForEach(Array(visibleResults.enumerated()), id: \.element.id) { index, result in
             SefariaSearchResultRowView(result: result, index: index)
 
-            if index < min(results.count, maxVisibleResults) - 1 {
+            if index < visibleResults.count - 1 {
               Divider()
             }
           }
         }
 
         if results.count > maxVisibleResults {
-          Text("+ \(results.count - maxVisibleResults) more")
-            .font(.caption)
-            .foregroundStyle(.secondary)
+          Button {
+            isExpanded.toggle()
+          } label: {
+            Text(isExpanded ? "Show fewer" : "Show \(results.count - maxVisibleResults) more")
+              .font(.caption)
+          }
+          .buttonStyle(.plain)
         }
       }
     }

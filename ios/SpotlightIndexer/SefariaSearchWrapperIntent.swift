@@ -7,34 +7,46 @@ struct SearchSefariaTextsIntent: AppIntent {
   static var description = IntentDescription(LocalizedStringResource("intent.search_texts.description", table: "AppShortcuts"))
 
   @Parameter(title: LocalizedStringResource("param.query", table: "AppShortcuts")) var query: String
-  @Parameter(title: LocalizedStringResource("param.type", table: "AppShortcuts"), default: "text") var type: String
-  @Parameter(title: LocalizedStringResource("param.field", table: "AppShortcuts"), default: "naive_lemmatizer") var field: String
-  @Parameter(title: LocalizedStringResource("param.size", table: "AppShortcuts"), default: 10) var size: Int
-  @Parameter(title: LocalizedStringResource("param.slop", table: "AppShortcuts"), default: 10) var slop: Int
-  @Parameter(title: LocalizedStringResource("param.filters", table: "AppShortcuts"), default: "") var filters: String
-  @Parameter(title: LocalizedStringResource("param.filter_fields", table: "AppShortcuts"), default: "") var filterFields: String
-  @Parameter(title: LocalizedStringResource("param.sort_method", table: "AppShortcuts"), default: "score") var sortMethod: String
-  @Parameter(title: LocalizedStringResource("param.sort_fields", table: "AppShortcuts"), default: "pagesheetrank") var sortFields: String
-  @Parameter(title: LocalizedStringResource("param.sort_reverse", table: "AppShortcuts"), default: false) var sortReverse: Bool
-  @Parameter(title: LocalizedStringResource("param.sort_score_missing", table: "AppShortcuts"), default: 0.04) var sortScoreMissing: Double
-  @Parameter(title: LocalizedStringResource("param.source_projection", table: "AppShortcuts"), default: true) var sourceProjection: Bool
-  @Parameter(title: LocalizedStringResource("param.aggregations", table: "AppShortcuts"), default: "path") var aggregations: String
+
+  @Parameter(title: LocalizedStringResource("param.search_type", table: "AppShortcuts"), default: .text)
+  var type: SefariaSearchTypeOption
+
+  @Parameter(title: LocalizedStringResource("param.search_field", table: "AppShortcuts"), default: .smart)
+  var field: SefariaSearchFieldOption
+
+  @Parameter(title: LocalizedStringResource("param.size", table: "AppShortcuts"), default: 10)
+  var size: Int
+
+  @Parameter(title: LocalizedStringResource("param.slop", table: "AppShortcuts"), default: 10)
+  var slop: Int
+
+  @Parameter(title: LocalizedStringResource("param.advanced_filters", table: "AppShortcuts"), default: "")
+  var filters: String
+
+  @Parameter(title: LocalizedStringResource("param.advanced_filter_fields", table: "AppShortcuts"), default: "")
+  var filterFields: String
+
+  @Parameter(title: LocalizedStringResource("param.search_aggregation", table: "AppShortcuts"), default: .path)
+  var aggregations: SefariaSearchAggregationOption
+
+  @Parameter(title: LocalizedStringResource("param.source_projection", table: "AppShortcuts"), default: true)
+  var sourceProjection: Bool
 
   func perform() async throws -> some IntentResult & ReturnsValue<[SefariaSearchResult]> & ProvidesDialog & ShowsSnippetView {
     let results = await SefariaSearchWrapperClient.search(
       query: query,
-      type: type,
-      field: field,
+      type: type.rawValue,
+      field: field.rawValue,
       size: size,
       slop: slop,
       filters: filters,
       filterFields: filterFields,
-      sortMethod: sortMethod,
-      sortFields: sortFields,
-      sortReverse: sortReverse,
-      sortScoreMissing: sortScoreMissing,
+      sortMethod: "score",
+      sortFields: "pagesheetrank",
+      sortReverse: false,
+      sortScoreMissing: 0.04,
       sourceProjection: sourceProjection,
-      aggregations: aggregations
+      aggregations: aggregations.rawValue
     )
 
     return .result(
