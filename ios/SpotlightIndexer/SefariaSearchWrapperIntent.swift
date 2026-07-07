@@ -20,7 +20,7 @@ struct SearchSefariaTextsIntent: AppIntent {
   @Parameter(title: LocalizedStringResource("param.source_projection", table: "AppShortcuts"), default: true) var sourceProjection: Bool
   @Parameter(title: LocalizedStringResource("param.aggregations", table: "AppShortcuts"), default: "path") var aggregations: String
 
-  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaSearchResult]> {
+  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaSearchResult]> & ProvidesDialog & ShowsSnippetView {
     let results = await SefariaSearchWrapperClient.search(
       query: query,
       type: type,
@@ -36,7 +36,13 @@ struct SearchSefariaTextsIntent: AppIntent {
       sourceProjection: sourceProjection,
       aggregations: aggregations
     )
-    return .result(value: results)
+
+    return .result(
+      value: results,
+      dialog: SefariaIntentDialogs.textSearch(query: query, count: results.count)
+    ) {
+      SefariaSearchResultsSnippetView(query: query, results: results)
+    }
   }
 }
 
