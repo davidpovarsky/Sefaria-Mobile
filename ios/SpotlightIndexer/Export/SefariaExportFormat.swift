@@ -1,5 +1,6 @@
 import Foundation
 import AppIntents
+import UniformTypeIdentifiers
 
 @available(iOS 16.0, *)
 enum SefariaExportFormat: String, AppEnum {
@@ -30,12 +31,12 @@ enum SefariaExportFormat: String, AppEnum {
     }
   }
 
-  var contentTypeIdentifier: String {
+  var contentType: UTType {
     switch self {
     case .json:
-      return "public.json"
+      return UTType(filenameExtension: "json") ?? .data
     case .vcf:
-      return "public.vcard"
+      return UTType(filenameExtension: "vcf") ?? UTType(importedAs: "public.vcard")
     }
   }
 }

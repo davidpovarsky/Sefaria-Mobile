@@ -10,7 +10,7 @@ enum SefariaIntentFileBuilder {
     return IntentFile(
       data: data,
       filename: fileName,
-      type: format.contentTypeIdentifier
+      type: format.contentType
     )
   }
 
