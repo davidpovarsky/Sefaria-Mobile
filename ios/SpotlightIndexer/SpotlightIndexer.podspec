@@ -8,8 +8,8 @@ Pod::Spec.new do |s|
   s.author       = { 'Sefaria Reader' => 'hello@sefaria.org' }
   s.platforms    = { :ios => '15.5' }
   s.source       = { :path => '.' }
-  s.source_files = '*.{h,m,swift}'
+  s.source_files = '**/*.{h,m,swift}'
   s.swift_version = '5.0'
-  s.frameworks   = 'CoreSpotlight', 'AppIntents', 'UIKit'
+  s.frameworks   = 'CoreSpotlight', 'AppIntents', 'UIKit', 'SwiftUI'
   s.dependency 'React-Core'
 end

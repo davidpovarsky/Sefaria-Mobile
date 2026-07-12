@@ -295,8 +295,19 @@ struct FindSefariaSourcesIntent: AppIntent {
   @Parameter(title: LocalizedStringResource("param.query", table: "AppShortcuts")) var query: String
   @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
-  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
-    .result(value: Array(SefariaIntentStore.findSources(query: query, limit: limit)))
+  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> & ProvidesDialog & ShowsSnippetView {
+    let results = Array(SefariaIntentStore.findSources(query: query, limit: limit))
+
+    return .result(
+      value: results,
+      dialog: SefariaIntentDialogs.sourceSearch(query: query, count: results.count)
+    ) {
+      SefariaSourceResultsSnippetView(
+        query: query,
+        title: "Sefaria Source Search",
+        sources: results
+      )
+    }
   }
 }
 
@@ -308,10 +319,20 @@ struct FindSefariaSourcesByAuthorIntent: AppIntent {
   @Parameter(title: LocalizedStringResource("param.author", table: "AppShortcuts")) var author: String
   @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
-  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
+  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> & ProvidesDialog & ShowsSnippetView {
     let q = author.lowercased()
-    let results = SefariaIntentStore.sources().filter { $0.author.lowercased().contains(q) }
-    return .result(value: Array(results.prefix(limit)))
+    let results = Array(SefariaIntentStore.sources().filter { $0.author.lowercased().contains(q) }.prefix(limit))
+
+    return .result(
+      value: results,
+      dialog: SefariaIntentDialogs.sourceAuthorSearch(author: author, count: results.count)
+    ) {
+      SefariaSourceResultsSnippetView(
+        query: author,
+        title: "Sources by Author",
+        sources: results
+      )
+    }
   }
 }
 
@@ -323,25 +344,37 @@ struct FindSefariaSourcesInCategoryIntent: AppIntent {
   @Parameter(title: LocalizedStringResource("param.category", table: "AppShortcuts")) var category: String
   @Parameter(title: LocalizedStringResource("param.limit", table: "AppShortcuts"), default: 10) var limit: Int
 
-  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> {
+  func perform() async throws -> some IntentResult & ReturnsValue<[SefariaIntentSource]> & ProvidesDialog & ShowsSnippetView {
     let q = category.lowercased()
-    let results = SefariaIntentStore.sources().filter { $0.path.lowercased().contains(q) }
-    return .result(value: Array(results.prefix(limit)))
+    let results = Array(SefariaIntentStore.sources().filter { $0.path.lowercased().contains(q) }.prefix(limit))
+
+    return .result(
+      value: results,
+      dialog: SefariaIntentDialogs.sourceCategorySearch(category: category, count: results.count)
+    ) {
+      SefariaSourceResultsSnippetView(
+        query: category,
+        title: "Sources in Category",
+        sources: results
+      )
+    }
   }
 }
 
 @available(iOS 16.0, *)
 struct SefariaShortcutsProvider: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
-    AppShortcut(intent: GetCurrentSefariaStateIntent(), phrases: ["Get current state in \(.applicationName)"])
     AppShortcut(intent: GetCurrentSefariaRefIntent(), phrases: ["Get current ref in \(.applicationName)"])
     AppShortcut(intent: GetCurrentSefariaRefURLIntent(), phrases: ["Get current ref URL in \(.applicationName)"])
     AppShortcut(intent: OpenSefariaRefIntent(), phrases: ["Open ref in \(.applicationName)"])
     AppShortcut(intent: OpenSefariaSearchIntent(), phrases: ["Open search in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesIntent(), phrases: ["Find sources in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesByAuthorIntent(), phrases: ["Find sources by author in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesInCategoryIntent(), phrases: ["Find sources in category in \(.applicationName)"])
-    AppShortcut(intent: SearchSefariaTextsIntent(), phrases: ["Search texts in \(.applicationName)"])
-    AppShortcut(intent: LookupSefariaNameIntent(), phrases: ["Lookup name in \(.applicationName)"])
+
+    AppShortcut(intent: SearchSefariaTextsIntent(), phrases: ["Preview text search in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesIntent(), phrases: ["Preview sources in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesByAuthorIntent(), phrases: ["Preview sources by author in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesInCategoryIntent(), phrases: ["Preview sources in category in \(.applicationName)"])
+
+    AppShortcut(intent: ExportSefariaTextSearchIntent(), phrases: ["Export text search in \(.applicationName)"])
+    AppShortcut(intent: ExportSefariaSourcesIntent(), phrases: ["Export sources in \(.applicationName)"])
   }
 }

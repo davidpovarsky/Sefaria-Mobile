@@ -13,17 +13,29 @@
 "intent.open_search.title" = "פתיחת חיפוש בספריא";
 "intent.open_search.description" = "פותח את מסך החיפוש באפליקציית ספריא עם שאילתה.";
 
-"intent.find_sources.title" = "חיפוש מקורות בספריא";
-"intent.find_sources.description" = "מחפש במטמון המקומי של מקורות ספריא.";
+"intent.find_sources.title" = "תצוגת חיפוש מקורות בספריא";
+"intent.find_sources.description" = "מציג תצוגה עשירה של מקורות תואמים בספריא.";
 
-"intent.find_sources_author.title" = "חיפוש מקורות לפי מחבר";
-"intent.find_sources_author.description" = "מחזיר מקורות ששדה המחבר שלהם מתאים לחיפוש.";
+"intent.find_sources_author.title" = "תצוגת מקורות לפי מחבר";
+"intent.find_sources_author.description" = "מציג תצוגה עשירה של מקורות בספריא לפי מחבר.";
 
-"intent.find_sources_category.title" = "חיפוש מקורות לפי קטגוריה";
-"intent.find_sources_category.description" = "מחזיר מקורות שהנתיב או הקטגוריה שלהם מתאימים לחיפוש.";
+"intent.find_sources_category.title" = "תצוגת מקורות לפי קטגוריה";
+"intent.find_sources_category.description" = "מציג תצוגה עשירה של מקורות בספריא לפי קטגוריה.";
 
-"intent.search_texts.title" = "חיפוש בטקסטים של ספריא";
-"intent.search_texts.description" = "מריץ חיפוש בספריא ברקע ומחזיר תוצאות לקיצורי הדרך.";
+"intent.search_texts.title" = "תצוגת חיפוש טקסטים בספריא";
+"intent.search_texts.description" = "מציג תצוגה עשירה של תוצאות חיפוש בטקסטים של ספריא.";
+
+"intent.export_text_search.title" = "ייצוא חיפוש טקסטים בספריא";
+"intent.export_text_search.description" = "חיפוש בטקסטים של ספריא וייצוא התוצאות כקובץ JSON או vCard.";
+
+"intent.export_sources.title" = "ייצוא מקורות בספריא";
+"intent.export_sources.description" = "חיפוש מקורות בספריא וייצוא התוצאות כקובץ JSON או vCard.";
+
+"intent.export_sources_author.title" = "ייצוא מקורות לפי מחבר";
+"intent.export_sources_author.description" = "חיפוש מקורות בספריא לפי מחבר וייצוא התוצאות כקובץ JSON או vCard.";
+
+"intent.export_sources_category.title" = "ייצוא מקורות לפי קטגוריה";
+"intent.export_sources_category.description" = "חיפוש מקורות בספריא לפי קטגוריה וייצוא התוצאות כקובץ JSON או vCard.";
 
 "intent.lookup_name.title" = "השלמת שם בספריא";
 "intent.lookup_name.description" = "משלים מקורות, ספרים, מחברים, נושאים, אוספים, קטגוריות, מונחים ואנשים באמצעות Name API של ספריא.";
@@ -51,16 +63,48 @@
 "param.sort_score_missing" = "ציון חסר במיון";
 "param.source_projection" = "החזרת שדות מקור";
 "param.aggregations" = "קיבוצים";
+"param.search_type" = "סוג חיפוש";
+"param.search_field" = "שדה חיפוש";
+"param.search_aggregation" = "קיבוץ תוצאות";
+"param.advanced_filters" = "סינונים מתקדמים";
+"param.advanced_filter_fields" = "שדות סינון מתקדמים";
+"param.output_format" = "פורמט פלט";
+
+"enum.search_type.name" = "סוג חיפוש";
+"enum.search_type.text.title" = "טקסטים";
+"enum.search_type.text.subtitle" = "חיפוש בתוך טקסטים בספריא";
+
+"enum.search_field.name" = "שדה חיפוש";
+"enum.search_field.smart.title" = "חיפוש עברי חכם";
+"enum.search_field.smart.subtitle" = "מתאים לעברית ולצורות מילים קרובות";
+"enum.search_field.exact.title" = "חיפוש מדויק";
+"enum.search_field.exact.subtitle" = "חיפוש לפי המילים המדויקות שהוקלדו";
+
+"enum.search_aggregation.name" = "קיבוץ תוצאות";
+"enum.search_aggregation.path.title" = "לפי מדור";
+"enum.search_aggregation.path.subtitle" = "קיבוץ תוצאות לפי מיקום בספריית ספריא";
+"enum.search_aggregation.none.title" = "ללא קיבוץ";
+"enum.search_aggregation.none.subtitle" = "החזרת תוצאות חיפוש רגילות";
+
+"enum.export_format.name" = "פורמט פלט";
+"enum.export_format.json.title" = "קובץ JSON";
+"enum.export_format.json.subtitle" = "ייצוא נתוני התוצאות בפורמט קריא למכונה";
+"enum.export_format.vcf.title" = "קובץ vCard";
+"enum.export_format.vcf.subtitle" = "ייצוא התוצאות ככרטיסים לתצוגת רשימה עשירה יותר בקיצורים";
 
 "shortcut.get_current_state.phrase" = "קבל מצב נוכחי ב־${applicationName}";
 "shortcut.get_current_ref.phrase" = "קבל מקור נוכחי ב־${applicationName}";
 "shortcut.get_current_ref_url.phrase" = "קבל קישור למקור נוכחי ב־${applicationName}";
 "shortcut.open_ref.phrase" = "פתח מקור ב־${applicationName}";
 "shortcut.open_search.phrase" = "פתח חיפוש ב־${applicationName}";
-"shortcut.find_sources.phrase" = "חפש מקורות ב־${applicationName}";
-"shortcut.find_sources_author.phrase" = "חפש מקורות לפי מחבר ב־${applicationName}";
-"shortcut.find_sources_category.phrase" = "חפש מקורות לפי קטגוריה ב־${applicationName}";
-"shortcut.search_texts.phrase" = "חפש בטקסטים ב־${applicationName}";
+"shortcut.find_sources.phrase" = "הצג מקורות ב־${applicationName}";
+"shortcut.find_sources_author.phrase" = "הצג מקורות לפי מחבר ב־${applicationName}";
+"shortcut.find_sources_category.phrase" = "הצג מקורות לפי קטגוריה ב־${applicationName}";
+"shortcut.search_texts.phrase" = "הצג חיפוש טקסטים ב־${applicationName}";
+"shortcut.export_text_search.phrase" = "ייצא חיפוש טקסטים ב־${applicationName}";
+"shortcut.export_sources.phrase" = "ייצא מקורות ב־${applicationName}";
+"shortcut.export_sources_author.phrase" = "ייצא מקורות לפי מחבר ב־${applicationName}";
+"shortcut.export_sources_category.phrase" = "ייצא מקורות לפי קטגוריה ב־${applicationName}";
 "shortcut.lookup_name.phrase" = "השלם שם ב־${applicationName}";
 
 "Get current state in ${applicationName}" = "קבל מצב נוכחי ב־${applicationName}";
@@ -72,4 +116,12 @@
 "Find sources by author in ${applicationName}" = "חפש מקורות לפי מחבר ב־${applicationName}";
 "Find sources in category in ${applicationName}" = "חפש מקורות לפי קטגוריה ב־${applicationName}";
 "Search texts in ${applicationName}" = "חפש בטקסטים ב־${applicationName}";
+"Preview sources in ${applicationName}" = "הצג מקורות ב־${applicationName}";
+"Preview sources by author in ${applicationName}" = "הצג מקורות לפי מחבר ב־${applicationName}";
+"Preview sources in category in ${applicationName}" = "הצג מקורות לפי קטגוריה ב־${applicationName}";
+"Preview text search in ${applicationName}" = "הצג חיפוש טקסטים ב־${applicationName}";
+"Export text search in ${applicationName}" = "ייצא חיפוש טקסטים ב־${applicationName}";
+"Export sources in ${applicationName}" = "ייצא מקורות ב־${applicationName}";
+"Export sources by author in ${applicationName}" = "ייצא מקורות לפי מחבר ב־${applicationName}";
+"Export sources in category in ${applicationName}" = "ייצא מקורות לפי קטגוריה ב־${applicationName}";
 "Lookup name in ${applicationName}" = "השלם שם ב־${applicationName}";
