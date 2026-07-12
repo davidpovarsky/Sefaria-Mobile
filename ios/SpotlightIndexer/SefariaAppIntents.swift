@@ -369,10 +369,14 @@ struct SefariaShortcutsProvider: AppShortcutsProvider {
     AppShortcut(intent: GetCurrentSefariaRefURLIntent(), phrases: ["Get current ref URL in \(.applicationName)"])
     AppShortcut(intent: OpenSefariaRefIntent(), phrases: ["Open ref in \(.applicationName)"])
     AppShortcut(intent: OpenSefariaSearchIntent(), phrases: ["Open search in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesIntent(), phrases: ["Find sources in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesByAuthorIntent(), phrases: ["Find sources by author in \(.applicationName)"])
-    AppShortcut(intent: FindSefariaSourcesInCategoryIntent(), phrases: ["Find sources in category in \(.applicationName)"])
-    AppShortcut(intent: SearchSefariaTextsIntent(), phrases: ["Search texts in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesIntent(), phrases: ["Preview sources in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesByAuthorIntent(), phrases: ["Preview sources by author in \(.applicationName)"])
+    AppShortcut(intent: FindSefariaSourcesInCategoryIntent(), phrases: ["Preview sources in category in \(.applicationName)"])
+    AppShortcut(intent: SearchSefariaTextsIntent(), phrases: ["Preview text search in \(.applicationName)"])
+    AppShortcut(intent: ExportSefariaTextSearchIntent(), phrases: ["Export text search in \(.applicationName)"])
+    AppShortcut(intent: ExportSefariaSourcesIntent(), phrases: ["Export sources in \(.applicationName)"])
+    AppShortcut(intent: ExportSefariaSourcesByAuthorIntent(), phrases: ["Export sources by author in \(.applicationName)"])
+    AppShortcut(intent: ExportSefariaSourcesInCategoryIntent(), phrases: ["Export sources in category in \(.applicationName)"])
     AppShortcut(intent: LookupSefariaNameIntent(), phrases: ["Lookup name in \(.applicationName)"])
   }
 }

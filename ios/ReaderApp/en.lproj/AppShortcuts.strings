@@ -13,17 +13,29 @@
 "intent.open_search.title" = "Open Sefaria Search";
 "intent.open_search.description" = "Opens the Sefaria app search screen with a query.";
 
-"intent.find_sources.title" = "Find Sefaria Sources";
-"intent.find_sources.description" = "Searches the local Sefaria source index cache.";
+"intent.find_sources.title" = "Preview Sefaria Source Search";
+"intent.find_sources.description" = "Shows a rich preview of matching Sefaria sources.";
 
-"intent.find_sources_author.title" = "Find Sefaria Sources by Author";
-"intent.find_sources_author.description" = "Returns sources whose author field matches the query.";
+"intent.find_sources_author.title" = "Preview Sefaria Sources by Author";
+"intent.find_sources_author.description" = "Shows a rich preview of Sefaria sources by author.";
 
-"intent.find_sources_category.title" = "Find Sefaria Sources in Category";
-"intent.find_sources_category.description" = "Returns sources whose path or category matches the query.";
+"intent.find_sources_category.title" = "Preview Sefaria Sources in Category";
+"intent.find_sources_category.description" = "Shows a rich preview of Sefaria sources in a category.";
 
-"intent.search_texts.title" = "Search Sefaria Texts";
-"intent.search_texts.description" = "Runs a Sefaria search in the background and returns results to Shortcuts.";
+"intent.search_texts.title" = "Preview Sefaria Text Search";
+"intent.search_texts.description" = "Shows a rich preview of Sefaria text search results.";
+
+"intent.export_text_search.title" = "Export Sefaria Text Search";
+"intent.export_text_search.description" = "Search Sefaria texts and export the results as a JSON or vCard file.";
+
+"intent.export_sources.title" = "Export Sefaria Sources";
+"intent.export_sources.description" = "Find Sefaria sources and export the results as a JSON or vCard file.";
+
+"intent.export_sources_author.title" = "Export Sefaria Sources by Author";
+"intent.export_sources_author.description" = "Find Sefaria sources by author and export the results as a JSON or vCard file.";
+
+"intent.export_sources_category.title" = "Export Sefaria Sources in Category";
+"intent.export_sources_category.description" = "Find Sefaria sources in a category and export the results as a JSON or vCard file.";
 
 "intent.lookup_name.title" = "Lookup Sefaria Name";
 "intent.lookup_name.description" = "Autocompletes refs, book titles, authors, topics, collections, categories, terms, and people using Sefaria's Name API.";
@@ -56,6 +68,7 @@
 "param.search_aggregation" = "Group results";
 "param.advanced_filters" = "Advanced filters";
 "param.advanced_filter_fields" = "Advanced filter fields";
+"param.output_format" = "Output format";
 
 "enum.search_type.name" = "Search type";
 "enum.search_type.text.title" = "Texts";
@@ -73,15 +86,25 @@
 "enum.search_aggregation.none.title" = "No grouping";
 "enum.search_aggregation.none.subtitle" = "Return plain search results";
 
+"enum.export_format.name" = "Output format";
+"enum.export_format.json.title" = "JSON file";
+"enum.export_format.json.subtitle" = "Export machine-readable result data";
+"enum.export_format.vcf.title" = "vCard file";
+"enum.export_format.vcf.subtitle" = "Export results as vCards for richer list display in Shortcuts";
+
 "shortcut.get_current_state.phrase" = "Get current state in ${applicationName}";
 "shortcut.get_current_ref.phrase" = "Get current ref in ${applicationName}";
 "shortcut.get_current_ref_url.phrase" = "Get current ref URL in ${applicationName}";
 "shortcut.open_ref.phrase" = "Open ref in ${applicationName}";
 "shortcut.open_search.phrase" = "Open search in ${applicationName}";
-"shortcut.find_sources.phrase" = "Find sources in ${applicationName}";
-"shortcut.find_sources_author.phrase" = "Find sources by author in ${applicationName}";
-"shortcut.find_sources_category.phrase" = "Find sources in category in ${applicationName}";
-"shortcut.search_texts.phrase" = "Search texts in ${applicationName}";
+"shortcut.find_sources.phrase" = "Preview sources in ${applicationName}";
+"shortcut.find_sources_author.phrase" = "Preview sources by author in ${applicationName}";
+"shortcut.find_sources_category.phrase" = "Preview sources in category in ${applicationName}";
+"shortcut.search_texts.phrase" = "Preview text search in ${applicationName}";
+"shortcut.export_text_search.phrase" = "Export text search in ${applicationName}";
+"shortcut.export_sources.phrase" = "Export sources in ${applicationName}";
+"shortcut.export_sources_author.phrase" = "Export sources by author in ${applicationName}";
+"shortcut.export_sources_category.phrase" = "Export sources in category in ${applicationName}";
 "shortcut.lookup_name.phrase" = "Lookup name in ${applicationName}";
 
 "Get current state in ${applicationName}" = "Get current state in ${applicationName}";
@@ -93,4 +116,12 @@
 "Find sources by author in ${applicationName}" = "Find sources by author in ${applicationName}";
 "Find sources in category in ${applicationName}" = "Find sources in category in ${applicationName}";
 "Search texts in ${applicationName}" = "Search texts in ${applicationName}";
+"Preview sources in ${applicationName}" = "Preview sources in ${applicationName}";
+"Preview sources by author in ${applicationName}" = "Preview sources by author in ${applicationName}";
+"Preview sources in category in ${applicationName}" = "Preview sources in category in ${applicationName}";
+"Preview text search in ${applicationName}" = "Preview text search in ${applicationName}";
+"Export text search in ${applicationName}" = "Export text search in ${applicationName}";
+"Export sources in ${applicationName}" = "Export sources in ${applicationName}";
+"Export sources by author in ${applicationName}" = "Export sources by author in ${applicationName}";
+"Export sources in category in ${applicationName}" = "Export sources in category in ${applicationName}";
 "Lookup name in ${applicationName}" = "Lookup name in ${applicationName}";
