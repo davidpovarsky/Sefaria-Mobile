@@ -9,7 +9,6 @@ on:
       - "🚀 Deploy iOS QA Build"
       - "Build iOS IPA"
     types:
-      - requested
       - in_progress
       - completed
 
