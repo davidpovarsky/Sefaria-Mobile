@@ -8,18 +8,50 @@ jobs:
     runs-on: macos-15
 
     steps:
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Prepare log folder
         run: mkdir -p build-logs
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Print tool versions
         run: |
           {
@@ -31,6 +63,14 @@ jobs:
             echo "macOS:" && sw_vers
           } 2>&1 | tee build-logs/00-versions.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Fast fail if AppDelegate still initializes Firebase
         run: |
           set -o pipefail
@@ -46,6 +86,14 @@ jobs:
             echo "OK: AppDelegate has no Firebase initialization."
           } 2>&1 | tee build-logs/00b-fast-fail-appdelegate-scan.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Create dummy GoogleService plist for Xcode resource reference
         run: |
           set -e
@@ -70,6 +118,14 @@ jobs:
           plutil -lint ios/GoogleService-Info.plist
           ls -l ios/GoogleService-Info.plist | tee build-logs/00c-dummy-google-service-plist.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Apply custom Sefaria extensions integration patch
         run: |
           set -o pipefail
@@ -113,6 +169,14 @@ jobs:
           print('SefariaAppIntents source verified: custom scheme, single search intent, Name API shortcut exposed')
           PY
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Verify custom extension source files
         run: |
           set -o pipefail
@@ -160,11 +224,27 @@ jobs:
             echo "OK: custom extension source verification passed."
           } 2>&1 | tee build-logs/00e-custom-extension-source-check.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Install JS dependencies
         run: |
           set -o pipefail
           npm install 2>&1 | tee build-logs/01-npm-install.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Replace Firebase JS packages with no-op shims
         run: |
           set -o pipefail
@@ -219,6 +299,14 @@ jobs:
           EOF
           echo "OK: Firebase JS imports are satisfied by no-op shims." | tee build-logs/01b-firebase-shims.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Bundle JS before Xcode build
         run: |
           set -o pipefail
@@ -230,18 +318,42 @@ jobs:
             --bundle-output build-logs/main.jsbundle \
             --assets-dest build-logs/jsbundle-assets 2>&1 | tee build-logs/02-js-bundle.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Remove stale CocoaPods checkout artifacts
         run: |
           set -e
           rm -rf ios/Pods ios/Podfile.lock ios/ReaderApp.xcworkspace
           echo "Removed stale Pods, Podfile.lock, and workspace before fresh pod install." | tee build-logs/02b-clean-pods.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Install CocoaPods
         run: |
           set -o pipefail
           cd ios
           pod install 2>&1 | tee ../build-logs/03-pod-install.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Verify Spotlight and App Intents pod installed
         run: |
           set -o pipefail
@@ -255,6 +367,14 @@ jobs:
             echo "OK: SpotlightIndexer pod is present."
           } 2>&1 | tee build-logs/03a-spotlight-appintents-pod-check.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Verify Firebase pods are absent
         run: |
           set -o pipefail
@@ -271,6 +391,14 @@ jobs:
             echo "OK: no Firebase-related pods found."
           } 2>&1 | tee build-logs/03b-no-firebase-pod-check.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Build unsigned iOS app
         run: |
           set -o pipefail
@@ -286,6 +414,14 @@ jobs:
             PRODUCT_BUNDLE_IDENTIFIER=com.davidpovarsky.sefariareader \
             build 2>&1 | tee build-logs/04-xcodebuild.log
 
+      - name: Live Activity · refresh
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Package IPA
         run: |
           set -e
@@ -300,6 +436,15 @@ jobs:
           cp -R "$APP_PATH" Payload/
           zip -r SefariaReader.ipa Payload 2>&1 | tee -a build-logs/05-package.log
 
+      - name: Live Activity · refresh
+        if: success()
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Upload IPA artifact
         if: success()
         uses: actions/upload-artifact@v4
@@ -307,6 +452,15 @@ jobs:
           name: SefariaReader-IPA
           path: SefariaReader.ipa
 
+      - name: Live Activity · refresh
+        if: always()
+        uses: davidpovarsky/github-automation/live-refresh@main
+        continue-on-error: true
+        with:
+          event: refresh
+          device_id: ${{ secrets.NOTIFY_DEVICE_ID }}
+          token: ${{ secrets.NOTIFY_DEVICE_TOKEN }}
+          github_token: ${{ github.token }}
       - name: Upload build logs
         if: always()
         uses: actions/upload-artifact@v4
